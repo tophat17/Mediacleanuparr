@@ -1,16 +1,36 @@
 # mediacleanuparr
 
-**Prune your Radarr & Sonarr libraries by audience rating — safely, with a mandatory dry run.**
+**Purge low-rated, oversized, and empty media from your Radarr/Sonarr libraries to reclaim disk space — safely, with a dry run first.**
 
-mediacleanuparr is a small self-hosted web app that scans your movie and TV
-libraries, flags low-rated titles, the biggest space hogs, and empty/orphaned
-entries, shows you a **dry run first**, and only deletes after you review the
-list and type `DELETE`. It runs as a single Docker container with a clean web UI
-and is built for Unraid (but runs anywhere Docker does).
+---
+
+## The problem
+
+Media libraries have a way of quietly getting out of control. You add things on a
+whim, Overseerr/Jellyseerr requests pile up, and Radarr/Sonarr keep grabbing
+upgrades — and before long your array is full of stuff you'll never actually
+watch: one-star movies, a 200 GB show you bailed on after episode two, and a
+graveyard of empty "monitored" entries and orphaned folders left behind by past
+deletions.
+
+Cleaning that up by hand is miserable. You'd have to cross-reference ratings,
+sort by size, figure out what's actually taking up space, and delete each item
+in Radarr/Sonarr one at a time — all while hoping you don't nuke something you
+meant to keep or leave orphaned files behind.
+
+**mediacleanuparr does that triage for you.** It connects to Radarr and Sonarr,
+scores everything by audience rating, surfaces your biggest space hogs and your
+empty/orphaned cruft, and lets you clean it all out from one screen — with a
+**mandatory dry run** so you always see exactly what will happen before anything
+is deleted. Reclaim space, keep the good stuff, and stop low-quality titles from
+silently coming back.
+
+It runs as a single Docker container with a clean web UI, is built for Unraid
+(but runs anywhere Docker does), **defaults to dry-run-only**, and never deletes
+outside your media folder.
 
 - **Image:** `tophat17/mediacleanuparr`
 - **Web UI:** port `8787`
-- **Defaults to dry-run-only** and never deletes outside your media folder.
 
 ---
 
