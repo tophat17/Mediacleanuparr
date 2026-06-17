@@ -43,7 +43,6 @@ outside your media folder.
 - [How to use](#how-to-use)
 - [Safety model](#safety-model)
 - [Build from source](#build-from-source)
-- [Getting listed on the Unraid App Store](#getting-listed-on-the-unraid-app-store)
 - [License](#license)
 
 ---
@@ -81,27 +80,11 @@ outside your media folder.
 
 ## Install on Unraid
 
-### Option A — Community Applications (once listed)
-
-> Listing is in progress (see [Getting listed](#getting-listed-on-the-unraid-app-store)).
-> When it's live:
+mediacleanuparr is available in **Community Applications** — the easiest way to
+install it.
 
 1. Open the **Apps** tab in the Unraid web UI.
 2. Search **mediacleanuparr** and click **Install**.
-3. Set the two paths and the port (see the form fields below), then **Apply**.
-
-### Option B — Add the template manually (works today)
-
-You can run it before it's in the store by adding the template directly:
-
-1. In Unraid, go to **Docker → Add Container**.
-2. In the **Template repositories** box (Docker page, bottom), you can paste this
-   repo URL to make the template available:
-   `https://github.com/tophat17/Mediacleanuparr`
-   — or simply download
-   [`unraid-template.xml`](unraid-template.xml) to
-   `/boot/config/plugins/dockerMan/templates-user/my-mediacleanuparr.xml` and it
-   will appear under **Add Container → Template**.
 3. Fill in the form:
 
 | Field | Value | Notes |
@@ -112,6 +95,10 @@ You can run it before it's in the store by adding the template directly:
 | **TZ** *(advanced)* | `America/Vancouver` | Your timezone. |
 
 4. **Apply**, then open the WebUI and do the [first-run setup](#first-run-setup).
+
+> Prefer to add it by hand? Download [`unraid-template.xml`](unraid-template.xml)
+> to `/boot/config/plugins/dockerMan/templates-user/` and it'll show up under
+> **Docker → Add Container → Template**.
 
 > **Path-matching gotcha:** mediacleanuparr compares file paths with what
 > Radarr/Sonarr report. Mount `/media` so those paths line up. If Radarr reports
@@ -225,28 +212,6 @@ Run the tests:
 pip install -r requirements.txt
 python -m pytest -q
 ```
-
----
-
-## Getting listed on the Unraid App Store
-
-Community Applications (CA) is Unraid's app store. The current process
-([official docs](https://docs.unraid.net/unraid-os/using-unraid-to/run-docker-containers/community-applications/)):
-
-1. **Publish the image publicly** to Docker Hub (`tophat17/mediacleanuparr`) — done
-   via the included GitHub Actions workflow.
-2. **Provide the template + docs** — this repo includes
-   [`unraid-template.xml`](unraid-template.xml), an icon, and this README.
-3. **Create a support thread** on the Unraid Community forums (required). The
-   template's `Support` field should point at it (it currently points at this
-   repo's Issues as a fallback).
-4. **Use an open-source license** — this project is MIT (see [LICENSE](LICENSE)).
-5. **Submit to Community Applications** via the CA submission form linked from the
-   docs above. The CA moderation team reviews submissions for safety and
-   conflicts before listing.
-
-Once approved, Unraid users install it straight from the **Apps** tab as in
-[Option A](#install-on-unraid).
 
 ---
 
