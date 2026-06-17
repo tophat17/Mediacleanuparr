@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Maintainer>
+  <Profile>
+    tophat17 — self-hosted tools for media servers. mediacleanuparr prunes your
+    Radarr and Sonarr libraries by audience rating, clears the biggest space hogs
+    and empty/orphaned entries, and always shows a dry run before anything is
+    deleted.
+  </Profile>
+  <Icon>https://raw.githubusercontent.com/tophat17/Mediacleanuparr/main/app/static/icon.png</Icon>
+  <Project>https://github.com/tophat17/Mediacleanuparr</Project>
+  <Support>https://github.com/tophat17/Mediacleanuparr/issues</Support>
+</Maintainer>
