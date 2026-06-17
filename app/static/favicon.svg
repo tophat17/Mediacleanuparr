@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="mediacleanuparr">
+  <rect width="64" height="64" rx="14" fill="#14161b"/>
+  <rect x="16" y="11" width="32" height="42" rx="4" fill="#e0a83a"/>
+  <g fill="#14161b">
+    <rect x="19" y="15" width="4" height="4" rx="1"/>
+    <rect x="19" y="23" width="4" height="4" rx="1"/>
+    <rect x="19" y="31" width="4" height="4" rx="1"/>
+    <rect x="19" y="39" width="4" height="4" rx="1"/>
+    <rect x="19" y="45" width="4" height="4" rx="1"/>
+    <rect x="41" y="15" width="4" height="4" rx="1"/>
+    <rect x="41" y="23" width="4" height="4" rx="1"/>
+    <rect x="41" y="31" width="4" height="4" rx="1"/>
+    <rect x="41" y="39" width="4" height="4" rx="1"/>
+    <rect x="41" y="45" width="4" height="4" rx="1"/>
+  </g>
+  <rect x="25" y="16" width="14" height="32" rx="2" fill="#14161b"/>
+  <path d="M27 26 l5 5 l5 -5 M27 34 l5 5 l5 -5"
+        fill="none" stroke="#e0a83a" stroke-width="2.6"
+        stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

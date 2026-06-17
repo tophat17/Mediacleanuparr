@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>mediacleanuparr</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="stylesheet" href="/style.css?v=18" />
+</head>
+<body>
+  <header>
+    <h1>media<span class="dot">·</span>cleanuparr</h1>
+    <span class="tagline">prune Radarr &amp; Sonarr by TMDb audience rating</span>
+    <span id="modeBadge" class="mode dry">DRY RUN ONLY</span>
+  </header>
+
+  <main>
+    <nav class="tabs">
+      <button data-tab="setup" class="active">Setup</button>
+      <button data-tab="scan">Scan &amp; review</button>
+      <button data-tab="biggest">Biggest items</button>
+      <button data-tab="logs">Logs &amp; reports</button>
+    </nav>
+
+    <!-- SETUP ------------------------------------------------------------ -->
+    <section id="setup" class="view active">
+      <div class="panel">
+        <h2>Radarr (movies)</h2>
+        <div class="row">
+          <div class="field">
+            <label>Radarr URL</label>
+            <input id="radarr_url" type="url" placeholder="http://192.168.1.10:7878" />
+          </div>
+          <div class="field">
+            <label>Radarr API key</label>
+            <input id="radarr_api_key" type="password" placeholder="leave blank to keep current" />
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn ghost" id="testRadarr">Test connection</button>
+          <span id="radarrStatus" class="status pending"></span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Sonarr (TV)</h2>
+        <div class="row">
+          <div class="field">
+            <label>Sonarr URL</label>
+            <input id="sonarr_url" type="url" placeholder="http://192.168.1.10:8989" />
+          </div>
+          <div class="field">
+            <label>Sonarr API key</label>
+            <input id="sonarr_api_key" type="password" placeholder="leave blank to keep current" />
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn ghost" id="testSonarr">Test connection</button>
+          <span id="sonarrStatus" class="status pending"></span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Ratings (TheMovieDB) — required</h2>
+        <div class="field">
+          <label>TMDb API key — used to look up audience ratings (free key at themoviedb.org → Settings → API)</label>
+          <input id="tmdb_api_key" type="password" placeholder="leave blank to keep current" />
+        </div>
+        <div class="btn-row">
+          <button class="btn ghost" id="testTmdb">Test connection</button>
+          <span id="tmdbStatus" class="status pending"></span>
+        </div>
+        <p class="muted" style="font-size:12px;margin:0">
+          A saved TMDb key is <strong>required to scan</strong> — scoring uses the audience
+          (user) vote average, scaled to 0–100. Radarr/Sonarr's own ratings are used first, so
+          TMDb is only queried for titles they can't rate (TMDb has no daily request limit).
+          Titles with no rating, or a rating of 0, are marked
+          <span class="pill review">needs review</span> and never deleted.
+        </p>
+      </div>
+
+      <div class="panel">
+        <h2>Overseerr / Jellyseerr (optional)</h2>
+        <div class="row">
+          <div class="field">
+            <label>Seerr URL</label>
+            <input id="seerr_url" type="url" placeholder="http://192.168.1.10:5055" />
+          </div>
+          <div class="field">
+            <label>Seerr API key</label>
+            <input id="seerr_api_key" type="password" placeholder="leave blank to keep current" />
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn ghost" id="testSeerr">Test connection</button>
+          <span id="seerrStatus" class="status pending"></span>
+        </div>
+        <p class="muted" style="font-size:12px;margin:0">
+          Optional. When set, anything mediacleanuparr deletes is also cleared from
+          Overseerr/Jellyseerr so it stops auto-requeuing it. The title stays fully
+          re-requestable in Seerr afterwards — this does <strong>not</strong> blacklist it.
+        </p>
+      </div>
+
+      <div class="panel">
+        <h2>Deletion behaviour</h2>
+        <div class="toggle">
+          <input type="checkbox" id="dry_run_only" checked />
+          <label>Dry-run-only mode <span class="hint">— deletions are refused while this is on</span></label>
+        </div>
+        <div class="toggle">
+          <input type="checkbox" id="delete_files_enabled" />
+          <label>Delete files from disk <span class="hint">— required to delete. With this on and dry-run-only off, confirmed items have their files deleted (movies are removed from Radarr, series are unmonitored in Sonarr)</span></label>
+        </div>
+        <div class="toggle">
+          <input type="checkbox" id="add_import_exclusion" checked />
+          <label>Radarr: add import exclusion <span class="hint">— stops flagged movies being re-downloaded</span></label>
+        </div>
+        <div class="toggle">
+          <input type="checkbox" id="sonarr_unmonitor" checked />
+          <label>Sonarr: unmonitor flagged series <span class="hint">— keeps the show in Sonarr but stops it re-downloading (Sonarr has no import exclusion)</span></label>
+        </div>
+        <div id="liveWarn" class="banner warn" style="display:none">
+          Dry-run-only is OFF. Confirmed deletions will act on your library.
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Environment (read-only)</h2>
+        <p class="muted" style="font-size:12px;margin:0 0 6px">
+          Media roots: <span id="mediaRoots" class="status"></span>
+        </p>
+        <p class="muted" style="font-size:12px;margin:0">
+          Config dir: <span id="configDir" class="status"></span> · Port:
+          <span id="appPort" class="status"></span> · TZ: <span id="tzVal" class="status"></span>
+        </p>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn" id="saveSettings">Save settings</button>
+        <span id="saveStatus" class="status"></span>
+      </div>
+    </section>
+
+    <!-- SCAN ------------------------------------------------------------- -->
+    <section id="scan" class="view">
+      <div class="panel">
+        <h2>Run a dry scan</h2>
+        <p class="muted" style="font-size:12px;margin-top:0">
+          A dry scan never changes anything. It lists items below your threshold and estimates
+          the space they use.
+        </p>
+        <div id="tmdbGate" class="banner warn" style="display:none">
+          Add and save a TheMovieDB (TMDb) API key in <strong>Setup</strong> before scanning — scoring needs it.
+        </div>
+
+        <div class="field">
+          <label>Minimum user rating — titles scoring below this are flagged (0–100 = TMDb audience score ×10)</label>
+          <div class="slider-wrap">
+            <input id="min_rt_score" type="range" min="0" max="100" value="50" />
+            <span class="slider-val"><span id="rtVal">50</span>/100 <span class="hint" id="rtImdb">(TMDb 5.0)</span></span>
+          </div>
+        </div>
+        <div class="toggle">
+          <input type="checkbox" id="include_unrated" />
+          <label>Include unrated titles in the list <span class="hint">(still never auto-selected for deletion)</span></label>
+        </div>
+        <div class="toggle">
+          <input type="checkbox" id="auto_select_empty" />
+          <label>Clean up empty (0-byte) items &amp; folders
+            <span class="hint">— auto-selects entries with no files (removes them from Radarr/Sonarr) and lists orphaned empty folders to remove</span></label>
+        </div>
+
+        <div class="btn-row">
+          <select id="scanScope" style="background:var(--panel-2);border:1px solid var(--border);color:var(--text);padding:9px 11px;border-radius:5px;font-family:var(--mono)">
+            <option value="both">Movies + TV</option>
+            <option value="movies">Movies only</option>
+            <option value="tv">TV only</option>
+          </select>
+          <button class="btn" id="runScan">Run dry scan</button>
+          <span id="scanStatus" class="status pending"></span>
+        </div>
+
+        <div id="scanProgress" class="scan-progress" style="display:none">
+          <div class="progress-head">
+            <span id="progPhase">Starting…</span>
+            <span id="progPct" class="mono">0%</span>
+          </div>
+          <div class="progress-track"><div id="progBar" class="progress-fill"></div></div>
+          <div class="progress-sub">
+            <span id="progItems">0 / 0 items</span>
+            <span id="progBytes" class="mono">0 B / 0 B scanned</span>
+          </div>
+          <div id="progCurrent" class="progress-current"></div>
+        </div>
+      </div>
+
+      <div id="scanResults" style="display:none">
+        <div class="freed">
+          <span class="num" id="freedNum">0 B</span>
+          <span class="lbl">estimated to free</span>
+          <span class="sub" id="freedSub"></span>
+        </div>
+
+        <div id="scanErrors"></div>
+
+        <div class="panel" style="padding:0;overflow:auto">
+          <table>
+            <thead>
+              <tr>
+                <th></th>
+                <th>Title</th>
+                <th>Year</th>
+                <th>Type</th>
+                <th>Score</th>
+                <th>Source</th>
+                <th>Requested by</th>
+                <th>Path</th>
+                <th>Size</th>
+                <th>Proposed action</th>
+                <th>Re-download blocked</th>
+                <th>Note</th>
+                <th>Exclude</th>
+              </tr>
+            </thead>
+            <tbody id="resultsBody"></tbody>
+          </table>
+        </div>
+
+        <div class="confirm-gate" id="confirmGate" style="display:none">
+          <h2>Confirm deletion</h2>
+          <p style="font-size:13px;margin-top:0">
+            <span id="selCount">0</span> item(s) selected ·
+            <span id="selSize">0 B</span> on disk.
+            This will act through the Radarr/Sonarr API<span id="fileNote"></span>.
+            Type <strong>DELETE</strong> to proceed.
+          </p>
+          <div class="row" style="align-items:flex-end">
+            <div class="field" style="max-width:220px;margin:0">
+              <input id="confirmText" type="text" placeholder="DELETE" autocomplete="off" />
+            </div>
+            <button class="btn danger" id="runDelete" disabled>Delete selected</button>
+            <span id="deleteStatus" class="status"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="exclusionsPanel" style="display:none">
+        <h2>Excluded from scans</h2>
+        <p class="muted" style="font-size:12px;margin-top:0">
+          These titles are skipped on future scans. Remove one to let it be scanned again.
+        </p>
+        <div id="exclusionsList"></div>
+      </div>
+    </section>
+
+    <!-- BIGGEST ----------------------------------------------------------- -->
+    <section id="biggest" class="view">
+      <div class="panel">
+        <h2>Find the biggest items</h2>
+        <p class="muted" style="font-size:12px;margin-top:0">
+          Lists the items taking the most disk space, regardless of rating. Useful for
+          clearing large shows/movies you don't watch. Toggle what to purge, then confirm —
+          deletions also clear the item in Seerr (if configured) so it isn't re-queued.
+        </p>
+        <div class="field" style="max-width:360px">
+          <label>Include</label>
+          <select id="biggestScope">
+            <option value="both">Movies + TV</option>
+            <option value="movies">Movies only</option>
+            <option value="tv">TV only</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>How many to show (largest first)</label>
+          <div class="slider-wrap">
+            <input id="biggestLimit" type="range" min="5" max="200" value="50" step="5" />
+            <span class="slider-val"><span id="biggestLimitVal">50</span> items</span>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn" id="runBiggest">Find biggest items</button>
+          <span id="biggestStatus" class="status pending"></span>
+        </div>
+
+        <div id="biggestProgress" class="scan-progress" style="display:none">
+          <div class="progress-head">
+            <span id="bigProgPhase">Starting…</span>
+            <span id="bigProgPct" class="mono">0%</span>
+          </div>
+          <div class="progress-track"><div id="bigProgBar" class="progress-fill"></div></div>
+          <div class="progress-sub">
+            <span id="bigProgItems">0 / 0 items</span>
+            <span id="bigProgBytes" class="mono">0 B / 0 B</span>
+          </div>
+          <div id="bigProgCurrent" class="progress-current"></div>
+        </div>
+      </div>
+
+      <div id="biggestResults" style="display:none">
+        <div class="freed">
+          <span class="num" id="biggestTotal">0 B</span>
+          <span class="lbl">total size shown</span>
+          <span class="sub" id="biggestSub"></span>
+        </div>
+
+        <div id="biggestErrors"></div>
+
+        <div class="panel" style="padding:0;overflow:auto">
+          <table>
+            <thead>
+              <tr>
+                <th></th>
+                <th>Title</th>
+                <th>Year</th>
+                <th>Type</th>
+                <th>Size</th>
+                <th>Path</th>
+                <th>Note</th>
+              </tr>
+            </thead>
+            <tbody id="biggestBody"></tbody>
+          </table>
+        </div>
+
+        <div class="confirm-gate" id="biggestConfirmGate" style="display:none">
+          <h2>Confirm deletion</h2>
+          <p style="font-size:13px;margin-top:0">
+            <span id="biggestSelCount">0</span> item(s) selected ·
+            <span id="biggestSelSize">0 B</span> on disk.
+            This acts through Radarr/Sonarr (and Seerr if set). Type <strong>DELETE</strong> to proceed.
+          </p>
+          <div class="row" style="align-items:flex-end">
+            <div class="field" style="max-width:220px;margin:0">
+              <input id="biggestConfirmText" type="text" placeholder="DELETE" autocomplete="off" />
+            </div>
+            <button class="btn danger" id="biggestDelete" disabled>Delete selected</button>
+            <span id="biggestDeleteStatus" class="status"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LOGS ------------------------------------------------------------- -->
+    <section id="logs" class="view">
+      <div class="panel">
+        <h2>Action log</h2>
+        <div class="btn-row" style="margin-bottom:12px">
+          <button class="btn ghost" id="refreshLogs">Refresh</button>
+        </div>
+        <div id="logBody"><p class="empty">No actions logged yet.</p></div>
+      </div>
+      <div class="panel">
+        <h2>Saved reports</h2>
+        <div id="reportBody"><p class="empty">No reports yet.</p></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/app.js?v=18"></script>
+</body>
+</html>

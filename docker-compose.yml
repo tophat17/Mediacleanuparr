@@ -1,0 +1,18 @@
+services:
+  mediacleanuparr:
+    image: tophat17/mediacleanuparr:latest
+    # For local testing, build the image instead of pulling — uncomment:
+    # build: .
+    container_name: mediacleanuparr
+    ports:
+      # host:container — change the FIRST number to use a different web UI port
+      - "8787:8787"
+    volumes:
+      - ./config:/config
+      # Map your media library on the HOST to /media in the container.
+      # Mount it exactly as Radarr/Sonarr see it so the paths line up.
+      - /mnt/user/media:/media
+    restart: unless-stopped
+    # Everything else (Radarr/Sonarr URLs + API keys, TMDb key, rating threshold,
+    # scan scope, safety switches) is configured in the web UI and saved to
+    # /config. PUID/PGID/UMASK/TZ are baked into the image with Unraid defaults.

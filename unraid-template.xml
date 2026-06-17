@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>mediacleanuparr</Name>
+  <Repository>tophat17/mediacleanuparr:latest</Repository>
+  <Registry>https://hub.docker.com/r/tophat17/mediacleanuparr</Registry>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/tophat17/Mediacleanuparr/issues</Support>
+  <Project>https://github.com/tophat17/Mediacleanuparr</Project>
+  <Overview>
+    Prune your Radarr and Sonarr libraries by TMDb audience rating, with a mandatory dry run.
+
+    Scans movies and TV, flags titles below a user-rating threshold you choose, shows a dry-run
+    estimate of the space that would be freed, and only deletes after you review the list and type
+    DELETE. Extra tools: a "Biggest items" view to clear large titles you never watch, an
+    "Empty / 0-byte cleanup" toggle (removes empty entries that are also below your threshold, plus
+    orphaned empty folders), per-title "exclude from future scans", and optional Overseerr/Jellyseerr
+    sync so deletions stop being auto-requeued.
+
+    Defaults to DRY-RUN-ONLY and never deletes outside your media folder. Everything else — Radarr,
+    Sonarr, TMDb (required), and optional Seerr URLs/keys, the threshold, and the safety switches — is
+    configured in the web UI after the container starts and saved to /config.
+  </Overview>
+  <Category>MediaApp:Other Tools:Utilities</Category>
+  <WebUI>http://[IP]:[PORT:8787]/</WebUI>
+  <Icon>https://raw.githubusercontent.com/tophat17/Mediacleanuparr/main/app/static/icon.png</Icon>
+  <ExtraParams/>
+  <DonateText/>
+  <DonateLink/>
+
+  <!-- Web UI port -->
+  <Config Name="WebUI Port" Target="8787" Default="8787" Mode="tcp" Description="Web UI port" Type="Port" Display="always" Required="true" Mask="false">8787</Config>
+
+  <!-- App data: database, logs, deletion reports -->
+  <Config Name="Config" Target="/config" Default="/mnt/user/appdata/mediacleanuparr" Mode="rw" Description="App data: database, logs, and deletion reports." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/mediacleanuparr</Config>
+
+  <!-- Media library -->
+  <Config Name="Media" Target="/media" Default="/mnt/user/media" Mode="rw" Description="Your media library. Mount it EXACTLY as Radarr/Sonarr see it so paths line up. Read-write is needed for empty-folder cleanup." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/media</Config>
+
+  <!-- Timezone -->
+  <Config Name="TZ" Target="TZ" Default="America/Vancouver" Mode="" Description="Timezone, e.g. America/Vancouver." Type="Variable" Display="advanced" Required="false" Mask="false">America/Vancouver</Config>
+
+  <!-- Advanced: media roots inside the container (rarely changed) -->
+  <Config Name="MEDIA_ROOTS" Target="MEDIA_ROOTS" Default="/media" Mode="" Description="Comma-separated media roots inside the container. Leave as /media unless you mount multiple media shares." Type="Variable" Display="advanced" Required="false" Mask="false">/media</Config>
+</Container>
