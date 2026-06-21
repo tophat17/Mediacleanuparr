@@ -314,6 +314,24 @@ td.score { font-family: var(--mono); }
 .excl-title { flex: 1; font-size: 13px; }
 .excl-row .btn { padding: 3px 10px; font-size: 12px; }
 
+/* guide / about tab */
+.guide h3 {
+  font-size: 14px;
+  margin: 18px 0 4px;
+  color: var(--accent);
+}
+.guide p { margin: 6px 0; font-size: 13px; }
+.guide ul { margin: 6px 0 6px; padding-left: 20px; }
+.guide li { font-size: 13px; margin: 5px 0; }
+.guide code {
+  font-family: var(--mono);
+  font-size: 12px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
 /* app version footer */
 .app-footer {
   border-top: 1px solid var(--border);

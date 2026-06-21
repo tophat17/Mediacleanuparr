@@ -383,7 +383,7 @@ async def run_biggest_scan(scope: str, limit: int,
     def _mark_empty(rec: dict[str, Any]) -> None:
         """Turn a no-file arr entry into a removable empty candidate."""
         app_name = "Radarr" if rec["media_type"] == "movie" else "Sonarr"
-        block = " & blocked from re-download" if add_excl else ""
+        block = " & blocked from auto re-download" if add_excl else ""
         rec.pop("has_file", None)
         rec.update({
             "score": None, "rating_source": "empty", "size_bytes": 0,
