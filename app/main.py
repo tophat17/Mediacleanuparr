@@ -3,16 +3,17 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import secrets
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any, Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import __version__, config, database, scanner
+from . import __version__, config, database, scanner, unblock
 from .arr_client import ArrError, RadarrClient, SonarrClient
 from .deleter import execute_deletion
 from .ratings import test_tmdb
@@ -66,6 +67,7 @@ class SettingsUpdate(BaseModel):
     sonarr_unmonitor: Optional[bool] = None
     seerr_url: Optional[str] = None
     seerr_api_key: Optional[str] = None
+    auto_unblock_on_request: Optional[bool] = None
 
 
 class TestConnection(BaseModel):
@@ -124,6 +126,10 @@ def update_settings(body: SettingsUpdate) -> dict[str, Any]:
             raise HTTPException(400, "min_rt_score must be 0-100")
         config.set_value(key, value)
         changed.append(key)
+    # Generate a webhook token the first time auto-unblock is switched on.
+    if bool(config.get("auto_unblock_on_request")) and not str(config.get("seerr_webhook_token") or ""):
+        config.set_value("seerr_webhook_token", secrets.token_urlsafe(24))
+        changed.append("seerr_webhook_token")
     log.info("settings updated: %s", changed)
     return {"ok": True, "changed": changed, "settings": config.effective()}
 
@@ -302,6 +308,64 @@ def report_file(name: str) -> FileResponse:
     if not path.exists():
         raise HTTPException(404, "not found")
     return FileResponse(path)
+
+
+def _parse_seerr_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    """Pull media_type + tmdb/tvdb id out of an Overseerr/Jellyseerr webhook
+    payload. Tolerant of layout differences between versions."""
+    media = payload.get("media") if isinstance(payload.get("media"), dict) else {}
+
+    def _int(*vals: Any) -> Optional[int]:
+        for v in vals:
+            if v in (None, "", "0", 0):
+                continue
+            try:
+                return int(v)
+            except (TypeError, ValueError):
+                continue
+        return None
+
+    raw_type = str(media.get("media_type") or payload.get("media_type") or "").lower()
+    tmdb = _int(media.get("tmdbId"), media.get("tmdb_id"),
+                payload.get("media_tmdbid"), payload.get("tmdbId"))
+    tvdb = _int(media.get("tvdbId"), media.get("tvdb_id"),
+                payload.get("media_tvdbid"), payload.get("tvdbId"))
+    if raw_type.startswith("movie"):
+        media_type = "movie"
+    elif raw_type in ("tv", "show", "series"):
+        media_type = "tv"
+    else:
+        media_type = "tv" if tvdb else "movie"
+    return {"media_type": media_type, "tmdb_id": tmdb, "tvdb_id": tvdb}
+
+
+@app.post("/api/seerr/webhook")
+async def seerr_webhook(request: Request, token: str = "") -> dict[str, Any]:
+    expected = str(config.get("seerr_webhook_token") or "")
+    if not expected or not secrets.compare_digest(token, expected):
+        raise HTTPException(401, "invalid or missing webhook token")
+    if not bool(config.get("auto_unblock_on_request")):
+        return {"ok": True, "skipped": "auto-unblock is disabled"}
+    try:
+        payload = await request.json()
+    except Exception:  # noqa: BLE001
+        payload = {}
+    info = _parse_seerr_payload(payload if isinstance(payload, dict) else {})
+    if info["tmdb_id"] is None and info["tvdb_id"] is None:
+        return {"ok": True, "skipped": "no media id in payload"}
+    try:
+        result = await unblock.unblock_title(info["media_type"], info["tmdb_id"], info["tvdb_id"])
+    except Exception as exc:  # noqa: BLE001 - never 500 a webhook
+        log.exception("seerr webhook unblock failed")
+        return {"ok": False, "error": str(exc)}
+    log.info("seerr webhook: %s tmdb=%s tvdb=%s -> %s",
+             info["media_type"], info["tmdb_id"], info["tvdb_id"], result)
+    return {"ok": True, "media": info, **result}
+
+
+@app.get("/api/blocks")
+def blocks() -> dict[str, Any]:
+    return {"blocks": database.list_blocks(active_only=True)}
 
 
 # Static frontend (mounted last so /api/* wins).

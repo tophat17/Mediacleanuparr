@@ -29,6 +29,8 @@ UI_EDITABLE: dict[str, str] = {
     "auto_select_empty": "AUTO_SELECT_EMPTY",
     "seerr_url": "SEERR_URL",
     "seerr_api_key": "SEERR_API_KEY",
+    "auto_unblock_on_request": "AUTO_UNBLOCK_ON_REQUEST",
+    "seerr_webhook_token": "SEERR_WEBHOOK_TOKEN",
 }
 
 # Sensitive keys masked in API responses.
@@ -58,6 +60,11 @@ DEFAULTS: dict[str, Any] = {
     # (it stays re-requestable manually).
     "seerr_url": "",
     "seerr_api_key": "",
+    # When on, a Seerr re-request webhook lifts the block this app placed on a
+    # title (removes the Radarr/Sonarr exclusion, re-monitors, re-adds & searches).
+    "auto_unblock_on_request": False,
+    # Shared token that must appear in the webhook URL (?token=...). Auto-generated.
+    "seerr_webhook_token": "",
 }
 
 # Read-only infra settings (not editable from the UI).

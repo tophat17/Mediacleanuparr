@@ -30,6 +30,9 @@ def _reports_dir() -> Path:
 async def _delete_movie(item: dict[str, Any], add_excl: bool) -> dict[str, Any]:
     client = RadarrClient(str(config.get("radarr_url")), str(config.get("radarr_api_key")))
     await client.delete_movie(int(item["arr_id"]), delete_files=True, add_exclusion=add_excl)
+    if add_excl:
+        database.add_block("movie", item.get("tmdb_id"), item.get("tvdb_id"),
+                           item.get("title"), "radarr_exclusion")
     return {"action": f"radarr-delete(files=true, exclusion={add_excl})", "success": True}
 
 
@@ -46,6 +49,8 @@ async def _delete_series(item: dict[str, Any]) -> dict[str, Any]:
     if do_unmonitor:
         await client.unmonitor_series(sid)
         parts.append("unmonitored")
+        database.add_block("tv", item.get("tmdb_id"), item.get("tvdb_id"),
+                           item.get("title"), "sonarr_unmonitor")
     return {"action": "sonarr-" + "+".join(parts), "success": True}
 
 
@@ -83,9 +88,15 @@ async def _remove_empty_arr(item: dict[str, Any], add_excl: bool) -> dict[str, A
     if item.get("media_type") == "movie":
         client = RadarrClient(str(config.get("radarr_url")), str(config.get("radarr_api_key")))
         await client.delete_movie(int(item["arr_id"]), delete_files=False, add_exclusion=add_excl)
+        if add_excl:
+            database.add_block("movie", item.get("tmdb_id"), item.get("tvdb_id"),
+                               item.get("title"), "radarr_exclusion")
         return {"action": f"radarr-remove-empty(exclusion={add_excl})", "success": True}
     client = SonarrClient(str(config.get("sonarr_url")), str(config.get("sonarr_api_key")))
     await client.delete_series(int(item["arr_id"]), delete_files=False, add_exclusion=add_excl)
+    if add_excl:
+        database.add_block("tv", item.get("tmdb_id"), item.get("tvdb_id"),
+                           item.get("title"), "sonarr_exclusion")
     return {"action": f"sonarr-remove-empty(exclusion={add_excl})", "success": True}
 
 

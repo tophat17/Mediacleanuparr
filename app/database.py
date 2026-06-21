@@ -92,6 +92,18 @@ def init_db(config_dir: str) -> None:
                 title       TEXT,
                 created_at  REAL
             );
+
+            CREATE TABLE IF NOT EXISTS blocks (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                created_at  REAL,
+                media_type  TEXT,
+                tmdb_id     INTEGER,
+                tvdb_id     INTEGER,
+                title       TEXT,
+                block_type  TEXT,
+                active      INTEGER DEFAULT 1,
+                lifted_at   REAL
+            );
             """
         )
         # Migrate databases created by older versions: CREATE TABLE IF NOT
@@ -358,3 +370,58 @@ def excluded_keys() -> set[str]:
             if r["tvdb_id"] is not None:
                 keys.add(f"{mt}:tvdb:{r['tvdb_id']}")
     return keys
+
+
+# ------------------------------- blocks -----------------------------------
+# A "block" records that mediacleanuparr applied a re-download restriction to a
+# title (Radarr import exclusion, Sonarr unmonitor, or Sonarr import-list
+# exclusion). It lets the Seerr webhook know what *we* blocked so a manual
+# re-request can lift exactly that — and nothing the user set themselves.
+
+def add_block(media_type: str, tmdb_id: Any, tvdb_id: Any, title: str, block_type: str) -> int:
+    with _LOCK, _connect() as conn:
+        cur = conn.execute(
+            "INSERT INTO blocks(created_at, media_type, tmdb_id, tvdb_id, title, "
+            "block_type, active) VALUES(?,?,?,?,?,?,1)",
+            (time.time(), media_type, tmdb_id, tvdb_id, title, block_type),
+        )
+        conn.commit()
+        return int(cur.lastrowid)
+
+
+def active_blocks_for(media_type: Any = None, tmdb_id: Any = None,
+                      tvdb_id: Any = None) -> list[dict[str, Any]]:
+    """Active blocks matching a title by tmdb_id or tvdb_id (and media_type if given)."""
+    clauses = ["active = 1"]
+    params: list[Any] = []
+    if media_type:
+        clauses.append("media_type = ?")
+        params.append(media_type)
+    id_clauses = []
+    if tmdb_id is not None:
+        id_clauses.append("tmdb_id = ?")
+        params.append(tmdb_id)
+    if tvdb_id is not None:
+        id_clauses.append("tvdb_id = ?")
+        params.append(tvdb_id)
+    if id_clauses:
+        clauses.append("(" + " OR ".join(id_clauses) + ")")
+    sql = "SELECT * FROM blocks WHERE " + " AND ".join(clauses) + " ORDER BY id DESC"
+    with _connect() as conn:
+        return [dict(r) for r in conn.execute(sql, params).fetchall()]
+
+
+def deactivate_block(block_id: int) -> None:
+    with _LOCK, _connect() as conn:
+        conn.execute("UPDATE blocks SET active = 0, lifted_at = ? WHERE id = ?",
+                     (time.time(), block_id))
+        conn.commit()
+
+
+def list_blocks(active_only: bool = True) -> list[dict[str, Any]]:
+    sql = "SELECT * FROM blocks"
+    if active_only:
+        sql += " WHERE active = 1"
+    sql += " ORDER BY id DESC"
+    with _connect() as conn:
+        return [dict(r) for r in conn.execute(sql).fetchall()]

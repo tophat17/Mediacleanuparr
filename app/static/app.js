@@ -60,7 +60,8 @@ document.querySelectorAll("nav.tabs button").forEach((btn) => {
 
 // --------------------------- settings ------------------------------------
 const BOOL_FIELDS = ["include_unrated", "auto_select_empty",
-  "dry_run_only", "delete_files_enabled", "add_import_exclusion", "sonarr_unmonitor"];
+  "dry_run_only", "delete_files_enabled", "add_import_exclusion", "sonarr_unmonitor",
+  "auto_unblock_on_request"];
 const TEXT_FIELDS = ["radarr_url", "sonarr_url", "seerr_url"];
 const SECRET_FIELDS = ["radarr_api_key", "sonarr_api_key", "tmdb_api_key", "seerr_api_key"];
 
@@ -79,6 +80,23 @@ async function loadSettings() {
   if ($("tzVal")) $("tzVal").textContent = s._tz;
   updateModeBadge(s.dry_run_only);
   updateTmdbGate(!!s.tmdb_api_key);
+  updateWebhookInfo(s);
+}
+
+function updateWebhookInfo(s) {
+  const box = $("webhookInfo");
+  if (!box) return;
+  const on = !!s.auto_unblock_on_request;
+  const token = s.seerr_webhook_token || "";
+  if (on && token) {
+    const inp = $("webhookUrl");
+    if (inp) inp.value = `${location.origin}/api/seerr/webhook?token=${encodeURIComponent(token)}`;
+    box.style.display = "block";
+  } else if (on) {
+    box.style.display = "block";  // enabled but not yet saved → token pending
+  } else {
+    box.style.display = "none";
+  }
 }
 
 let tmdbConfigured = false;
@@ -111,6 +129,12 @@ $("min_rt_score").addEventListener("input", (e) => {
   $("rtImdb").textContent = `(TMDb ${(e.target.value / 10).toFixed(1)})`;
 });
 $("dry_run_only").addEventListener("change", (e) => updateModeBadge(e.target.checked));
+if ($("auto_unblock_on_request")) {
+  $("auto_unblock_on_request").addEventListener("change", (e) => {
+    const box = $("webhookInfo");
+    if (box) box.style.display = e.target.checked ? "block" : "none";
+  });
+}
 
 $("saveSettings").addEventListener("click", async () => {
   const body = {};

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>mediacleanuparr</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="stylesheet" href="/style.css?v=20" />
+  <link rel="stylesheet" href="/style.css?v=21" />
 </head>
 <body>
   <header>
@@ -101,6 +101,26 @@
           Overseerr/Jellyseerr so it stops auto-requeuing it. The title stays fully
           re-requestable in Seerr afterwards — this does <strong>not</strong> blacklist it.
         </p>
+        <div class="toggle" style="margin-top:12px">
+          <input type="checkbox" id="auto_unblock_on_request" />
+          <label>Auto-unblock when re-requested in Seerr
+            <span class="hint">— when someone re-requests a title in Overseerr/Jellyseerr, automatically lift the block this app set: remove the Radarr/Sonarr exclusion, re-monitor, and re-add &amp; search. Needs the webhook below.</span></label>
+        </div>
+        <div id="webhookInfo" style="display:none">
+          <p class="muted" style="font-size:12px;margin:6px 0 4px">
+            In Overseerr/Jellyseerr go to <strong>Settings → Notifications → Webhook</strong>,
+            enable it, trigger on request events (e.g. “Request Approved” / “Auto Approved”),
+            and set the <strong>Webhook URL</strong> to:
+          </p>
+          <div class="field" style="margin:0">
+            <input id="webhookUrl" type="text" readonly onclick="this.select()"
+                   placeholder="Save settings to generate the webhook URL"
+                   style="font-family:var(--mono);font-size:12px" />
+          </div>
+          <p class="muted" style="font-size:11px;margin:6px 0 0">
+            Keep this URL private — the token in it authorizes unblocking.
+          </p>
+        </div>
       </div>
 
       <div class="panel">
@@ -477,6 +497,31 @@
           this app and are removed here.
         </p>
       </div>
+
+      <div class="panel guide">
+        <h2>Automatic unblock on re-request (Seerr)</h2>
+        <p>
+          Optional, and the easiest way to undo a block. With
+          <strong>Auto-unblock when re-requested in Seerr</strong> turned on in Setup and
+          the webhook configured, you don't have to touch Radarr/Sonarr by hand — when a
+          human re-requests a previously-removed title in Overseerr/Jellyseerr, this app
+          lifts its own block automatically.
+        </p>
+        <p>On a matching re-request it will:</p>
+        <ul>
+          <li>Remove the Radarr import exclusion (movies) or Sonarr import-list exclusion (removed series).</li>
+          <li>Re-monitor the title if it's still in Radarr/Sonarr.</li>
+          <li>Re-add it and trigger a search if it had been removed entirely — so the
+            request is fulfilled even if the exclusion briefly blocked Seerr's own add.</li>
+        </ul>
+        <p class="muted" style="font-size:12px">
+          It only ever lifts blocks <em>this app</em> recorded — a title you unmonitored or
+          excluded yourself is never touched. To set up: enable the toggle in Setup, click
+          Save, then paste the generated <strong>Webhook URL</strong> into
+          Overseerr/Jellyseerr → Settings → Notifications → Webhook (trigger on request
+          events). The token in the URL keeps it private.
+        </p>
+      </div>
     </section>
   </main>
 
@@ -484,6 +529,6 @@
     <span>media<span class="dot">·</span>cleanuparr <span id="appVersion" class="mono"></span></span>
   </footer>
 
-  <script src="/app.js?v=20"></script>
+  <script src="/app.js?v=21"></script>
 </body>
 </html>
