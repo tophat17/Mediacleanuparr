@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>mediacleanuparr</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="stylesheet" href="/style.css?v=21" />
+  <link rel="stylesheet" href="/style.css?v=22" />
 </head>
 <body>
   <header>
@@ -62,9 +62,9 @@
       </div>
 
       <div class="panel">
-        <h2>Ratings (TheMovieDB) — required</h2>
+        <h2>Ratings (TheMovieDB) - required</h2>
         <div class="field">
-          <label>TMDb API key — used to look up audience ratings (free key at themoviedb.org → Settings → API)</label>
+          <label>TMDb API key - used to look up audience ratings (free key at themoviedb.org → Settings → API)</label>
           <input id="tmdb_api_key" type="password" placeholder="leave blank to keep current" />
         </div>
         <div class="btn-row">
@@ -72,8 +72,8 @@
           <span id="tmdbStatus" class="status pending"></span>
         </div>
         <p class="muted" style="font-size:12px;margin:0">
-          A saved TMDb key is <strong>required to scan</strong> — scoring uses the audience
-          (user) vote average, scaled to 0–100. Radarr/Sonarr's own ratings are used first, so
+          A saved TMDb key is <strong>required to scan</strong> - scoring uses the audience
+          (user) vote average, scaled to 0-100. Radarr/Sonarr's own ratings are used first, so
           TMDb is only queried for titles they can't rate (TMDb has no daily request limit).
           Titles with no rating, or a rating of 0, are marked
           <span class="pill review">needs review</span> and never deleted.
@@ -99,12 +99,12 @@
         <p class="muted" style="font-size:12px;margin:0">
           Optional. When set, anything mediacleanuparr deletes is also cleared from
           Overseerr/Jellyseerr so it stops auto-requeuing it. The title stays fully
-          re-requestable in Seerr afterwards — this does <strong>not</strong> blacklist it.
+          re-requestable in Seerr afterwards - this does <strong>not</strong> blacklist it.
         </p>
         <div class="toggle" style="margin-top:12px">
           <input type="checkbox" id="auto_unblock_on_request" />
           <label>Auto-unblock when re-requested in Seerr
-            <span class="hint">— when someone re-requests a title in Overseerr/Jellyseerr, automatically lift the block this app set: remove the Radarr/Sonarr exclusion, re-monitor, and re-add &amp; search. Needs the webhook below.</span></label>
+            <span class="hint">- when someone re-requests a title in Overseerr/Jellyseerr, automatically lift the block this app set: remove the Radarr/Sonarr exclusion, re-monitor, and re-add &amp; search. Needs the webhook below.</span></label>
         </div>
         <div id="webhookInfo" style="display:none">
           <p class="muted" style="font-size:12px;margin:6px 0 4px">
@@ -118,7 +118,7 @@
                    style="font-family:var(--mono);font-size:12px" />
           </div>
           <p class="muted" style="font-size:11px;margin:6px 0 0">
-            Keep this URL private — the token in it authorizes unblocking.
+            Keep this URL private - the token in it authorizes unblocking.
           </p>
         </div>
       </div>
@@ -127,19 +127,19 @@
         <h2>Deletion behaviour</h2>
         <div class="toggle">
           <input type="checkbox" id="dry_run_only" checked />
-          <label>Dry-run-only mode <span class="hint">— deletions are refused while this is on</span></label>
+          <label>Dry-run-only mode <span class="hint">- deletions are refused while this is on</span></label>
         </div>
         <div class="toggle">
           <input type="checkbox" id="delete_files_enabled" />
-          <label>Delete files from disk <span class="hint">— required to delete. With this on and dry-run-only off, confirmed items have their files deleted (movies are removed from Radarr, series are unmonitored in Sonarr)</span></label>
+          <label>Delete files from disk <span class="hint">- required to delete. With this on and dry-run-only off, confirmed items have their files deleted (movies are removed from Radarr, series are unmonitored in Sonarr)</span></label>
         </div>
         <div class="toggle">
           <input type="checkbox" id="add_import_exclusion" checked />
-          <label>Radarr: add import exclusion <span class="hint">— stops flagged movies being re-downloaded</span></label>
+          <label>Radarr: add import exclusion <span class="hint">- stops flagged movies being re-downloaded</span></label>
         </div>
         <div class="toggle">
           <input type="checkbox" id="sonarr_unmonitor" checked />
-          <label>Sonarr: unmonitor flagged series <span class="hint">— keeps the show in Sonarr but stops it re-downloading (Sonarr has no import exclusion)</span></label>
+          <label>Sonarr: unmonitor flagged series <span class="hint">- keeps the show in Sonarr but stops it re-downloading (Sonarr has no import exclusion)</span></label>
         </div>
         <div id="liveWarn" class="banner warn" style="display:none">
           Dry-run-only is OFF. Confirmed deletions will act on your library.
@@ -168,11 +168,11 @@
           the space they use.
         </p>
         <div id="tmdbGate" class="banner warn" style="display:none">
-          Add and save a TheMovieDB (TMDb) API key in <strong>Setup</strong> before scanning — scoring needs it.
+          Add and save a TheMovieDB (TMDb) API key in <strong>Setup</strong> before scanning - scoring needs it.
         </div>
 
         <div class="field">
-          <label>Minimum user rating — titles scoring below this are flagged (0–100 = TMDb audience score ×10)</label>
+          <label>Minimum user rating - titles scoring below this are flagged (0-100 = TMDb audience score x10)</label>
           <div class="slider-wrap">
             <input id="min_rt_score" type="range" min="0" max="100" value="50" />
             <span class="slider-val"><span id="rtVal">50</span>/100 <span class="hint" id="rtImdb">(TMDb 5.0)</span></span>
@@ -185,7 +185,7 @@
         <div class="toggle">
           <input type="checkbox" id="auto_select_empty" />
           <label>Clean up empty (0-byte) items &amp; folders
-            <span class="hint">— auto-selects entries with no files (removes them from Radarr/Sonarr) and lists orphaned empty folders to remove</span></label>
+            <span class="hint">- auto-selects entries with no files (removes them from Radarr/Sonarr) and lists orphaned empty folders to remove</span></label>
         </div>
 
         <div class="btn-row">
@@ -200,7 +200,7 @@
 
         <div id="scanProgress" class="scan-progress" style="display:none">
           <div class="progress-head">
-            <span id="progPhase">Starting…</span>
+            <span id="progPhase">Starting...</span>
             <span id="progPct" class="mono">0%</span>
           </div>
           <div class="progress-track"><div id="progBar" class="progress-fill"></div></div>
@@ -277,7 +277,7 @@
         <h2>Find the biggest items</h2>
         <p class="muted" style="font-size:12px;margin-top:0">
           Lists the items taking the most disk space, regardless of rating. Useful for
-          clearing large shows/movies you don't watch. Toggle what to purge, then confirm —
+          clearing large shows/movies you don't watch. Toggle what to purge, then confirm -
           deletions also clear the item in Seerr (if configured) so it isn't re-queued.
         </p>
         <div class="field" style="max-width:360px">
@@ -298,7 +298,7 @@
         <div class="toggle">
           <input type="checkbox" id="biggest_empty_cleanup" />
           <label>Remove empty items &amp; orphaned folders
-            <span class="hint">— flags 0-byte entries with no files (removed from Radarr/Sonarr &amp; blocked from re-download) and orphaned empty folders on disk; these are pre-selected</span></label>
+            <span class="hint">- flags 0-byte entries with no files (removed from Radarr/Sonarr &amp; blocked from re-download) and orphaned empty folders on disk; these are pre-selected</span></label>
         </div>
         <div class="btn-row">
           <button class="btn" id="runBiggest">Find biggest items</button>
@@ -307,7 +307,7 @@
 
         <div id="biggestProgress" class="scan-progress" style="display:none">
           <div class="progress-head">
-            <span id="bigProgPhase">Starting…</span>
+            <span id="bigProgPhase">Starting...</span>
             <span id="bigProgPct" class="mono">0%</span>
           </div>
           <div class="progress-track"><div id="bigProgBar" class="progress-fill"></div></div>
@@ -373,6 +373,14 @@
         <div id="logBody"><p class="empty">No actions logged yet.</p></div>
       </div>
       <div class="panel">
+        <h2>Re-download blocks</h2>
+        <p class="muted" style="font-size:12px;margin-top:0">
+          Titles this app is currently blocking from auto re-download. Re-requesting one in
+          Seerr clears it automatically; unblock and re-add events appear in the action log above.
+        </p>
+        <div id="blocksBody"><p class="empty">No active blocks.</p></div>
+      </div>
+      <div class="panel">
         <h2>Saved reports</h2>
         <div id="reportBody"><p class="empty">No reports yet.</p></div>
       </div>
@@ -381,147 +389,48 @@
     <!-- GUIDE ------------------------------------------------------------ -->
     <section id="guide" class="view">
       <div class="panel guide">
-        <h2>What this app does</h2>
+        <h2>Quick start</h2>
         <p>
-          mediacleanuparr connects to <strong>Radarr</strong> (movies) and
-          <strong>Sonarr</strong> (TV) and helps you reclaim disk space by removing
-          low-rated, oversized, and empty/orphaned media — safely. It never deletes
-          anything on its own:
+          mediacleanuparr connects to Radarr (movies) and Sonarr (TV) and helps you
+          free up disk space by clearing out low-rated, oversized, and empty media.
+          Three things keep it safe:
         </p>
         <ul>
-          <li><strong>Dry-run-only</strong> is on by default. Scans only ever
-            <em>propose</em> — nothing is touched until you turn dry-run-only off in Setup.</li>
-          <li>Every real deletion makes you <strong>type <code>DELETE</code></strong> and confirm.</li>
-          <li>It only ever acts <strong>inside your mounted media folder</strong>, never a system path or a media root itself.</li>
+          <li>It starts in <strong>dry-run-only</strong> mode. Scans just show you what
+            they would remove; nothing is deleted until you turn dry-run off in Setup.</li>
+          <li>Every deletion makes you <strong>type <code>DELETE</code></strong> to confirm.</li>
+          <li>It only ever touches files inside your mounted media folder.</li>
+        </ul>
+        <p>The tabs:</p>
+        <ul>
+          <li><strong>Setup</strong>: connect Radarr, Sonarr and TMDb (TMDb is required
+            to scan), and set the safety switches. Overseerr/Jellyseerr is optional.</li>
+          <li><strong>Scan &amp; review</strong>: pick a minimum rating; titles below it
+            get flagged. Review the list, then type DELETE to remove them.</li>
+          <li><strong>Biggest items</strong>: find the titles using the most space,
+            whatever their rating. Tick "Remove empty items &amp; orphaned folders" to
+            also clear 0-byte entries and leftover empty folders.</li>
+          <li><strong>Logs &amp; reports</strong>: a history of everything the app has done.</li>
         </ul>
       </div>
 
       <div class="panel guide">
-        <h2>The tabs, explained</h2>
-
-        <h3>Setup</h3>
+        <h2>Blocking, and getting a title back</h2>
         <p>
-          Where you connect everything and set the safety switches. Enter your
-          Radarr, Sonarr and <strong>TMDb</strong> (required for rating scans) URLs and
-          API keys and test each one. Optionally connect Overseerr/Jellyseerr
-          ("Seerr"). The deletion-behaviour toggles here control what actually happens
-          when you confirm a deletion (see <em>How blocking works</em> below).
+          When you remove a title, the app also stops it from being grabbed again
+          automatically: movies get an exclusion in Radarr, and shows are unmonitored in
+          Sonarr. Nothing is permanently blacklisted.
         </p>
-
-        <h3>Scan &amp; review</h3>
-        <p>
-          The rating-based cleanup. Pick a minimum user rating (0–100, the TMDb
-          audience score ×10); anything scoring below it is flagged. Choose scope
-          (Movies / TV / Both), optionally <strong>Include unrated</strong> and
-          <strong>Clean up empty (0-byte) items &amp; folders</strong>, then
-          <strong>Run dry scan</strong>. Review the list, tick/untick rows, type
-          <code>DELETE</code> and confirm. Titles with no rating or a rating of 0 are
-          marked <span class="pill review">needs review</span> and are never
-          auto-selected. Each row also has an <strong>Exclude</strong> box.
-        </p>
-
-        <h3>Biggest items</h3>
-        <p>
-          Find your largest titles by disk size regardless of rating — great for
-          clearing big shows you never watch. Pick scope and how many to show (up to
-          500). Turn on <strong>Remove empty items &amp; orphaned folders</strong> to
-          also surface every 0-byte entry (no files on disk) and orphaned empty
-          folders; those are pre-selected because there's nothing on disk to lose.
-          Tick what to purge, type <code>DELETE</code>, confirm.
-        </p>
-
-        <h3>Logs &amp; reports</h3>
-        <p>
-          A full audit trail of every action it has taken, plus downloadable JSON/CSV
-          reports of each deletion run (saved under <code>/config/reports</code>).
-        </p>
-      </div>
-
-      <div class="panel guide">
-        <h2>How re-download blocking works</h2>
-        <p>
-          When you remove something, the app can also stop Radarr/Sonarr (and import
-          lists) from silently grabbing it again. What it does depends on the type and
-          your Setup toggles. The <strong>Re-download blocked</strong> column on a scan
-          shows whether blocking will be applied to each row.
-        </p>
+        <p>To bring something back you have two options:</p>
         <ul>
-          <li><strong>Movies (Radarr)</strong> — with <em>"Radarr: add import
-            exclusion"</em> on (default), the movie is added to Radarr's
-            <strong>Import List Exclusions</strong> when removed, so Radarr and your
-            import lists won't re-add or re-grab it.</li>
-          <li><strong>TV (Sonarr), with files</strong> — the episode files are deleted
-            and, with <em>"Sonarr: unmonitor flagged series"</em> on (default), the
-            series is <strong>unmonitored</strong> (series + all seasons) but kept in
-            Sonarr, so it stops auto-downloading.</li>
-          <li><strong>Empty / 0-byte entries</strong> — the stale entry is removed from
-            Radarr/Sonarr (no files to delete) and the same
-            <strong>import exclusion</strong> is applied, blocking auto re-download.</li>
-          <li><strong>Orphaned folders</strong> — just an empty directory deleted from
-            disk. No Radarr/Sonarr entry and no blocking involved.</li>
-          <li><strong>Overseerr / Jellyseerr (optional)</strong> — if connected, the
-            matching request is cleared so Seerr stops auto-requeuing it. Important:
-            the title stays fully <strong>re-requestable</strong> — it is
-            <strong>not</strong> blacklisted.</li>
+          <li><strong>Easiest (automatic):</strong> just re-request the title in
+            Overseerr/Jellyseerr. If you have turned on <strong>Auto-unblock</strong> in
+            Setup, the app clears the block and re-downloads it for you. To enable it:
+            tick Auto-unblock in Setup, click Save, then paste the Webhook URL it gives
+            you into Overseerr/Jellyseerr under Settings, Notifications, Webhook.</li>
+          <li><strong>By hand:</strong> in Radarr remove the movie's exclusion, or in
+            Sonarr turn monitoring back on for the show, then search.</li>
         </ul>
-        <p class="muted" style="font-size:12px">
-          Separately, the per-row <strong>Exclude</strong> checkbox is not a block — it
-          only tells <em>this app</em> to skip that title on future scans. It does
-          nothing to Radarr/Sonarr.
-        </p>
-      </div>
-
-      <div class="panel guide">
-        <h2>Unblocking &amp; putting a title back</h2>
-        <p>Nothing here is permanent. To restore something:</p>
-        <ul>
-          <li><strong>A blocked movie (Radarr)</strong> — in Radarr go to
-            <em>Settings → Lists → Import List Exclusions</em> (or the movie editor),
-            remove its exclusion, then add the movie back and search.</li>
-          <li><strong>An unmonitored series (Sonarr)</strong> — open the series in
-            Sonarr and turn <strong>monitoring</strong> back on for the series and the
-            seasons you want, then trigger a search. (Nothing was excluded; it was just
-            unmonitored.)</li>
-          <li><strong>An empty series that was removed (Sonarr)</strong> — if it was
-            removed with an exclusion, clear it under <em>Settings → Import Lists →
-            Import List Exclusions</em>, then re-add the series.</li>
-          <li><strong>A cleared Seerr request</strong> — just request the title again in
-            Overseerr/Jellyseerr; it was never blacklisted.</li>
-          <li><strong>A title you excluded from scans</strong> — open the
-            <em>Scan &amp; review</em> tab and remove it from the
-            <strong>"Excluded from scans"</strong> list at the bottom.</li>
-        </ul>
-        <p class="muted" style="font-size:12px">
-          Rule of thumb: re-download blocking lives in <em>Radarr/Sonarr</em>
-          (exclusion or unmonitor), so undoing it is done there. Scan exclusions live in
-          this app and are removed here.
-        </p>
-      </div>
-
-      <div class="panel guide">
-        <h2>Automatic unblock on re-request (Seerr)</h2>
-        <p>
-          Optional, and the easiest way to undo a block. With
-          <strong>Auto-unblock when re-requested in Seerr</strong> turned on in Setup and
-          the webhook configured, you don't have to touch Radarr/Sonarr by hand — when a
-          human re-requests a previously-removed title in Overseerr/Jellyseerr, this app
-          lifts its own block automatically.
-        </p>
-        <p>On a matching re-request it will:</p>
-        <ul>
-          <li>Remove the Radarr import exclusion (movies) or Sonarr import-list exclusion (removed series).</li>
-          <li>Re-monitor the title if it's still in Radarr/Sonarr.</li>
-          <li>Re-add it and trigger a search if it had been removed entirely — so the
-            request is fulfilled even if the exclusion briefly blocked Seerr's own add.</li>
-        </ul>
-        <p class="muted" style="font-size:12px">
-          On a re-request it clears the matching Radarr/Sonarr exclusion — whether this app
-          set it or it predates the app — then re-monitors and re-adds &amp; searches. (So an
-          exclusion you added by hand is also cleared if that title is re-requested.) To set
-          up: enable the toggle in Setup, click Save, then paste the generated
-          <strong>Webhook URL</strong> into Overseerr/Jellyseerr → Settings → Notifications →
-          Webhook (trigger on request events). The token in the URL keeps it private.
-        </p>
       </div>
     </section>
   </main>
@@ -530,6 +439,6 @@
     <span>media<span class="dot">·</span>cleanuparr <span id="appVersion" class="mono"></span></span>
   </footer>
 
-  <script src="/app.js?v=21"></script>
+  <script src="/app.js?v=22"></script>
 </body>
 </html>

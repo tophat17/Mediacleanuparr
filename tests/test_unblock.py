@@ -166,7 +166,7 @@ def test_webhook_parses_and_calls_unblock(monkeypatch):
 
     captured = {}
 
-    async def fake_unblock(media_type, tmdb_id, tvdb_id):
+    async def fake_unblock(media_type, tmdb_id, tvdb_id, title=None):
         captured.update(media_type=media_type, tmdb_id=tmdb_id, tvdb_id=tvdb_id)
         return {"unblocked": True, "actions": []}
 

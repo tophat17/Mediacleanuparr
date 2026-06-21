@@ -376,9 +376,9 @@ def excluded_keys() -> set[str]:
 # A "block" records that mediacleanuparr applied a re-download restriction to a
 # title (Radarr import exclusion, Sonarr unmonitor, or Sonarr import-list
 # exclusion). It lets the Seerr webhook know what *we* blocked so a manual
-# re-request can lift exactly that — and nothing the user set themselves.
+# re-request can lift exactly that - and nothing the user set themselves.
 
-def add_block(media_type: str, tmdb_id: Any, tvdb_id: Any, title: str, block_type: str) -> int:
+def add_block(media_type: str, tmdb_id, tvdb_id, title: str, block_type: str) -> int:
     with _LOCK, _connect() as conn:
         cur = conn.execute(
             "INSERT INTO blocks(created_at, media_type, tmdb_id, tvdb_id, title, "
@@ -389,8 +389,7 @@ def add_block(media_type: str, tmdb_id: Any, tvdb_id: Any, title: str, block_typ
         return int(cur.lastrowid)
 
 
-def active_blocks_for(media_type: Any = None, tmdb_id: Any = None,
-                      tvdb_id: Any = None) -> list[dict[str, Any]]:
+def active_blocks_for(media_type=None, tmdb_id=None, tvdb_id=None) -> list[dict[str, Any]]:
     """Active blocks matching a title by tmdb_id or tvdb_id (and media_type if given)."""
     clauses = ["active = 1"]
     params: list[Any] = []

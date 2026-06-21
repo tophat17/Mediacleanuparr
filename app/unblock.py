@@ -5,9 +5,9 @@ lift the re-download block: remove the Radarr/Sonarr exclusion, re-monitor the
 title, and re-add + search it if it's no longer in the library.
 
 Two paths:
-  * Recorded block — a block this app saved during a deletion (also covers the
+  * Recorded block - a block this app saved during a deletion (also covers the
     Sonarr "unmonitor" case, which has no exclusion).
-  * Fallback — no recorded block, but the requested title has a matching
+  * Fallback - no recorded block, but the requested title has a matching
     exclusion in Radarr/Sonarr (e.g. from before this feature existed). On an
     explicit re-request we clear that exclusion too and re-add & search.
 """
@@ -36,7 +36,7 @@ async def _unblock_movie(tmdb_id: Optional[int], require_exclusion: bool = False
     """Lift a movie block. With require_exclusion=True, do nothing unless a
     matching Radarr exclusion actually existed (returns None)."""
     if tmdb_id is None:
-        return None if require_exclusion else "no tmdb id — cannot unblock movie"
+        return None if require_exclusion else "no tmdb id - cannot unblock movie"
     rc = _radarr()
     notes: list[str] = []
     removed = await rc.remove_exclusion_for_tmdb(tmdb_id)
@@ -64,7 +64,7 @@ async def _unblock_movie(tmdb_id: Optional[int], require_exclusion: bool = False
 async def _unblock_series(tvdb_id: Optional[int], remove_exclusion: bool,
                           require_exclusion: bool = False) -> Optional[str]:
     if tvdb_id is None:
-        return None if require_exclusion else "no tvdb id — cannot unblock series"
+        return None if require_exclusion else "no tvdb id - cannot unblock series"
     sc = _sonarr()
     notes: list[str] = []
     removed = await sc.remove_exclusion_for_tvdb(tvdb_id) if remove_exclusion else False
@@ -93,8 +93,8 @@ async def _unblock_series(tvdb_id: Optional[int], remove_exclusion: bool,
 
 
 async def unblock_title(media_type: Optional[str], tmdb_id: Optional[int],
-                        tvdb_id: Optional[int]) -> dict[str, Any]:
-    """Lift any block on a re-requested title — a block this app recorded, or
+                        tvdb_id: Optional[int], title: Optional[str] = None) -> dict[str, Any]:
+    """Lift any block on a re-requested title - a block this app recorded, or
     any matching Radarr/Sonarr exclusion on an explicit re-request."""
     blocks = database.active_blocks_for(media_type or None, tmdb_id, tvdb_id)
 
@@ -140,7 +140,7 @@ async def unblock_title(media_type: Optional[str], tmdb_id: Optional[int],
         return {"unblocked": False,
                 "reason": "no recorded block and no matching exclusion", "actions": []}
     ident = tvdb_id if media_type == "tv" else tmdb_id
-    database.log_action(None, media_type or "?", None, str(ident),
+    database.log_action(None, media_type or "?", None, title or str(ident),
                         "unblock:exclusion", True, detail)
     return {"unblocked": True,
             "actions": [{"type": "exclusion", "ok": True, "detail": detail}]}

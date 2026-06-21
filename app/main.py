@@ -336,7 +336,8 @@ def _parse_seerr_payload(payload: dict[str, Any]) -> dict[str, Any]:
         media_type = "tv"
     else:
         media_type = "tv" if tvdb else "movie"
-    return {"media_type": media_type, "tmdb_id": tmdb, "tvdb_id": tvdb}
+    title = payload.get("subject") or media.get("title")
+    return {"media_type": media_type, "tmdb_id": tmdb, "tvdb_id": tvdb, "title": title}
 
 
 @app.post("/api/seerr/webhook")
@@ -354,7 +355,8 @@ async def seerr_webhook(request: Request, token: str = "") -> dict[str, Any]:
     if info["tmdb_id"] is None and info["tvdb_id"] is None:
         return {"ok": True, "skipped": "no media id in payload"}
     try:
-        result = await unblock.unblock_title(info["media_type"], info["tmdb_id"], info["tvdb_id"])
+        result = await unblock.unblock_title(info["media_type"], info["tmdb_id"],
+                                             info["tvdb_id"], info.get("title"))
     except Exception as exc:  # noqa: BLE001 - never 500 a webhook
         log.exception("seerr webhook unblock failed")
         return {"ok": False, "error": str(exc)}

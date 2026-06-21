@@ -38,7 +38,7 @@ class ArrClient:
             except httpx.RequestError as exc:
                 raise ArrError(f"Connection failed: {exc}") from exc
         if resp.status_code == 401:
-            raise ArrError("Unauthorized — check the API key")
+            raise ArrError("Unauthorized - check the API key")
         if resp.status_code >= 400:
             raise ArrError(f"HTTP {resp.status_code}: {resp.text[:200]}")
         return resp

@@ -2,8 +2,8 @@
 
 Used to keep Seerr in sync when mediacleanuparr removes media: we delete the
 item's media record in Seerr so it stops tracking/auto-requeuing it. Deleting
-the media record leaves the title fully re-requestable in Seerr — it does NOT
-blacklist it — so a user can choose to request it again later.
+the media record leaves the title fully re-requestable in Seerr - it does NOT
+blacklist it - so a user can choose to request it again later.
 
 Docs: Overseerr/Jellyseerr expose /api/v1 with an `X-Api-Key` header.
 """
@@ -42,7 +42,7 @@ class SeerrClient:
             except httpx.RequestError as exc:
                 raise SeerrError(f"Connection failed: {exc}") from exc
         if resp.status_code == 401:
-            raise SeerrError("Unauthorized — check the Seerr API key")
+            raise SeerrError("Unauthorized - check the Seerr API key")
         if resp.status_code >= 400 and resp.status_code != 404:
             raise SeerrError(f"Seerr returned HTTP {resp.status_code}")
         return resp

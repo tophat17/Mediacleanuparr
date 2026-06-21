@@ -131,7 +131,7 @@ def media_roots() -> list[str]:
 
 
 def seed_from_env() -> None:
-    """On first boot, persist nothing automatically — env stays authoritative
+    """On first boot, persist nothing automatically - env stays authoritative
     until the user explicitly saves from the UI. This function exists as a hook
     and intentionally does not write defaults into the DB.
     """

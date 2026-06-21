@@ -71,7 +71,7 @@ async function loadSettings() {
   BOOL_FIELDS.forEach((k) => { if ($(k)) $(k).checked = !!s[k]; });
   SECRET_FIELDS.forEach((k) => {
     // Secrets come back as booleans (set/unset). Show a placeholder if set.
-    if ($(k)) $(k).placeholder = s[k] ? "•••••• saved — leave blank to keep current" : "leave blank to keep current";
+    if ($(k)) $(k).placeholder = s[k] ? "•••••• saved - leave blank to keep current" : "leave blank to keep current";
   });
   $("min_rt_score").value = s.min_rt_score;
   $("rtVal").textContent = s.min_rt_score;
@@ -118,7 +118,7 @@ function updateModeBadge(dryOnly) {
     badge.className = "mode dry";
     $("liveWarn").style.display = "none";
   } else {
-    badge.textContent = "LIVE — DELETIONS ALLOWED";
+    badge.textContent = "LIVE - DELETIONS ALLOWED";
     badge.className = "mode live";
     $("liveWarn").style.display = "block";
   }
@@ -145,7 +145,7 @@ $("saveSettings").addEventListener("click", async () => {
   const st = $("saveStatus");
   const btn = $("saveSettings");
   btn.disabled = true;
-  st.textContent = "saving…"; st.className = "status pending";
+  st.textContent = "saving..."; st.className = "status pending";
   try {
     await api("/api/settings", { method: "POST", body: JSON.stringify(body), timeoutMs: 12000 });
     st.textContent = "saved"; st.className = "status ok";
@@ -161,7 +161,7 @@ $("saveSettings").addEventListener("click", async () => {
 async function testConn(which) {
   const statusEl = $(which + "Status");
   const btnEl = $("test" + which.charAt(0).toUpperCase() + which.slice(1));
-  statusEl.textContent = "testing…"; statusEl.className = "status pending";
+  statusEl.textContent = "testing..."; statusEl.className = "status pending";
   if (btnEl) btnEl.disabled = true;
   const urlEl = $(which + "_url");           // TMDb has no URL field
   const body = {
@@ -172,8 +172,8 @@ async function testConn(which) {
     const r = await api(`/api/test/${which}`, { method: "POST", body: JSON.stringify(body), timeoutMs: 12000 });
     if (r.ok) {
       statusEl.textContent = r.detail
-        ? `connected — ${r.detail}`
-        : `connected — ${r.app || which} ${r.version || ""}`.trim();
+        ? `connected - ${r.detail}`
+        : `connected - ${r.app || which} ${r.version || ""}`.trim();
       statusEl.className = "status ok";
     } else {
       statusEl.textContent = r.error || "failed"; statusEl.className = "status err";
@@ -198,10 +198,10 @@ $("runScan").addEventListener("click", async () => {
     st.textContent = "Add a TMDb API key in Setup first."; st.className = "status err";
     return;
   }
-  st.textContent = "starting…"; st.className = "status pending";
+  st.textContent = "starting..."; st.className = "status pending";
   $("runScan").disabled = true;
   showProgress(true);
-  setBar(null, "Starting…");        // indeterminate until totals known
+  setBar(null, "Starting...");        // indeterminate until totals known
   try {
     // Persist the on-page controls so they take effect for this scan even if
     // the user didn't visit Setup → Save.
@@ -241,8 +241,8 @@ function setBar(pct, phaseText) {
 }
 
 const PHASE_LABEL = {
-  fetching: "Fetching library from Radarr/Sonarr…",
-  scanning: "Scanning & rating titles…",
+  fetching: "Fetching library from Radarr/Sonarr...",
+  scanning: "Scanning & rating titles...",
   done: "Done",
   error: "Error",
 };
@@ -274,7 +274,7 @@ function pollProgress(st) {
           const d = await api(`/api/scan/${scanId}`, { timeoutMs: 15000 });
           currentScanId = scanId;
           renderScan(d.scan.summary || {}, d.items);
-          st.textContent = `done — scan #${scanId}`;
+          st.textContent = `done - scan #${scanId}`;
           st.className = p.status === "completed" ? "status ok" : "status err";
         } catch (e) {
           st.textContent = e.message; st.className = "status err";
@@ -328,7 +328,7 @@ function renderScan(summary, items) {
       ? `<span class="pill folder">folder</span>`
       : `<span class="pill ${it.media_type}">${it.media_type}</span>`;
     const exCell = isFolder
-      ? "—"
+      ? "-"
       : `<input type="checkbox" class="excl-cb" ${isExcluded(it) ? "checked" : ""}
            data-mt="${it.media_type}" data-tmdb="${it.tmdb_id ?? ""}" data-tvdb="${it.tvdb_id ?? ""}"
            data-title="${escapeHtml(it.title || "")}" title="Exclude from future scans" />`;
@@ -337,13 +337,13 @@ function renderScan(summary, items) {
       <td class="title">${escapeHtml(it.title || "")}</td>
       <td class="num">${it.year || ""}</td>
       <td>${typePill}</td>
-      <td class="score">${it.score == null ? "—" : it.score + "/100"}</td>
+      <td class="score">${it.score == null ? "-" : it.score + "/100"}</td>
       <td class="muted">${escapeHtml(it.rating_source || "")}</td>
-      <td class="muted">${escapeHtml(it.requested_by || "—")}</td>
+      <td class="muted">${escapeHtml(it.requested_by || "-")}</td>
       <td class="path">${escapeHtml(it.path || "")}</td>
       <td class="num">${fmtBytes(it.size_bytes)}</td>
       <td>${actionPill(it.proposed_action)}</td>
-      <td class="num">${it.prevent_redl ? "yes" : "—"}</td>
+      <td class="num">${it.prevent_redl ? "yes" : "-"}</td>
       <td class="muted" style="font-size:11px;max-width:240px">${escapeHtml(it.reason || "")}</td>
       <td class="checkbox-cell">${exCell}</td>
     </tr>`;
@@ -388,7 +388,7 @@ $("runDelete").addEventListener("click", async () => {
   const ids = selectedCheckboxes().map((c) => parseInt(c.dataset.id, 10));
   const st = $("deleteStatus");
   if (!confirm(`Permanently act on ${ids.length} item(s)? This cannot be undone.`)) return;
-  st.textContent = "deleting…"; st.className = "status pending";
+  st.textContent = "deleting..."; st.className = "status pending";
   $("runDelete").disabled = true;
   try {
     const r = await api("/api/delete", {
@@ -396,7 +396,7 @@ $("runDelete").addEventListener("click", async () => {
       body: JSON.stringify({ scan_id: currentScanId, confirm: $("confirmText").value, item_ids: ids }),
       timeoutMs: 600000,
     });
-    st.textContent = `done — ${r.deleted} deleted, ${r.failed} failed, ${fmtBytes(r.freed_bytes)} freed`;
+    st.textContent = `done - ${r.deleted} deleted, ${r.failed} failed, ${fmtBytes(r.freed_bytes)} freed`;
     st.className = "status ok";
     $("confirmText").value = "";
     loadLogs();
@@ -417,8 +417,10 @@ async function loadLogs() {
       box.innerHTML = r.actions.map((a) => {
         const t = new Date(a.ts * 1000).toLocaleString();
         const cls = a.success ? "ok" : "fail";
+        const tag = (a.action && a.action.indexOf("unblock") === 0)
+          ? '<span class="tag unblock">UNBLOCK</span> ' : "";
         return `<div class="logline"><span class="ts">${t}</span> ·
-          <span class="${cls}">${a.success ? "OK" : "FAIL"}</span> ·
+          <span class="${cls}">${a.success ? "OK" : "FAIL"}</span> · ${tag}
           ${escapeHtml(a.media_type)} · ${escapeHtml(a.title || "")} ·
           <span class="muted">${escapeHtml(a.action)}</span>
           ${a.detail ? "· " + escapeHtml(a.detail) : ""}</div>`;
@@ -434,6 +436,29 @@ async function loadLogs() {
         `<div class="logline"><a href="/api/reports/${encodeURIComponent(f.name)}">${escapeHtml(f.name)}</a>
          <span class="muted">(${fmtBytes(f.size)})</span></div>`).join("");
     }
+  } catch (_) {}
+  loadBlocks();
+}
+
+async function loadBlocks() {
+  try {
+    const r = await api("/api/blocks");
+    const box = $("blocksBody");
+    if (!box) return;
+    const list = r.blocks || [];
+    if (!list.length) { box.innerHTML = '<p class="empty">No active blocks.</p>'; return; }
+    const label = {
+      radarr_exclusion: "Radarr exclusion",
+      sonarr_unmonitor: "Sonarr unmonitored",
+      sonarr_exclusion: "Sonarr exclusion",
+    };
+    box.innerHTML = list.map((b) => {
+      const when = b.created_at ? new Date(b.created_at * 1000).toLocaleDateString() : "";
+      return `<div class="excl-row"><span class="pill ${b.media_type}">${escapeHtml(b.media_type)}</span>
+        <span class="excl-title">${escapeHtml(b.title || "?")}</span>
+        <span class="muted">${escapeHtml(label[b.block_type] || b.block_type || "")}</span>
+        <span class="muted">${when}</span></div>`;
+    }).join("");
   } catch (_) {}
 }
 $("refreshLogs").addEventListener("click", loadLogs);
@@ -467,10 +492,10 @@ if ($("biggestLimit")) {
 if ($("runBiggest")) {
   $("runBiggest").addEventListener("click", async () => {
     const st = $("biggestStatus");
-    st.textContent = "starting…"; st.className = "status pending";
+    st.textContent = "starting..."; st.className = "status pending";
     $("runBiggest").disabled = true;
     showBigProgress(true);
-    setBigBar(null, "Starting…");
+    setBigBar(null, "Starting...");
     try {
       await api("/api/biggest", {
         method: "POST",
@@ -509,8 +534,8 @@ function setBigBar(pct, phaseText) {
 
 function pollBigProgress(st) {
   const labels = {
-    fetching: "Fetching library from Radarr/Sonarr…",
-    scanning: "Measuring & ranking by size…",
+    fetching: "Fetching library from Radarr/Sonarr...",
+    scanning: "Measuring & ranking by size...",
     done: "Done", error: "Error",
   };
   return new Promise((resolve) => {
@@ -629,7 +654,7 @@ if ($("biggestDelete")) {
     const ids = biggestSelected().map((c) => parseInt(c.dataset.id, 10));
     const st = $("biggestDeleteStatus");
     if (!confirm(`Permanently act on ${ids.length} item(s)? This cannot be undone.`)) return;
-    st.textContent = "deleting…"; st.className = "status pending";
+    st.textContent = "deleting..."; st.className = "status pending";
     $("biggestDelete").disabled = true;
     try {
       const r = await api("/api/delete", {
@@ -637,7 +662,7 @@ if ($("biggestDelete")) {
         body: JSON.stringify({ scan_id: currentBiggestScanId, confirm: $("biggestConfirmText").value, item_ids: ids }),
         timeoutMs: 600000,
       });
-      st.textContent = `done — ${r.deleted} deleted, ${r.failed} failed, ${fmtBytes(r.freed_bytes)} freed`;
+      st.textContent = `done - ${r.deleted} deleted, ${r.failed} failed, ${fmtBytes(r.freed_bytes)} freed`;
       st.className = "status ok";
       $("biggestConfirmText").value = "";
       loadLogs();

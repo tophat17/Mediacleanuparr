@@ -1,7 +1,7 @@
 """User-rating resolution (audience scores) via Radarr/Sonarr + TheMovieDB.
 
 Order of resolution:
-  1. Radarr/Sonarr `ratings` blob (TMDb, then IMDb) — free, no API calls. Since
+  1. Radarr/Sonarr `ratings` blob (TMDb, then IMDb) - free, no API calls. Since
      TMDb is Radarr's primary metadata source, this already covers almost every
      title.
   2. Cached TMDb API result.
@@ -132,14 +132,14 @@ async def test_tmdb(api_key: str) -> dict[str, Any]:
         return {"ok": False, "error": "no TMDb API key set"}
     data = await _tmdb_get("movie/278", api_key)
     if data is None:
-        return {"ok": False, "error": "TMDb request failed — check the key / network"}
+        return {"ok": False, "error": "TMDb request failed - check the key / network"}
     if isinstance(data, dict) and data.get("success") is False:
         return {"ok": False, "error": data.get("status_message") or "invalid TMDb API key"}
     title = data.get("title") if isinstance(data, dict) else None
     v = _to_100(data.get("vote_average")) if isinstance(data, dict) else None
     detail = title or "sample lookup OK"
     if v is not None:
-        detail = f"{detail} — user rating {v}/100"
+        detail = f"{detail} - user rating {v}/100"
     return {"ok": True, "app": "TheMovieDB", "detail": detail}
 
 
@@ -151,7 +151,7 @@ async def resolve_user_score(
     arr_ratings: Any = None,
 ) -> tuple[Optional[int], str]:
     """Return (user_rating_0_100_or_None, source_label). Radarr/Sonarr first."""
-    # 1. Radarr/Sonarr provided rating — primary, free, always fresh.
+    # 1. Radarr/Sonarr provided rating - primary, free, always fresh.
     arr_score = _arr_user(arr_ratings)
     if arr_score is not None:
         return arr_score, "Radarr/Sonarr"

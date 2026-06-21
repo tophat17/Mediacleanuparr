@@ -1,7 +1,7 @@
 """Dry-run scanner with live progress.
 
 Pulls movies/series from the arr apps, resolves IMDb user ratings, and
-classifies each item. Nothing is ever deleted here — the scanner only proposes.
+classifies each item. Nothing is ever deleted here - the scanner only proposes.
 
 A module-level progress object is updated as the scan runs so the UI can show a
 progress bar. This is a single-user tool, so only one scan runs at a time.
@@ -85,14 +85,14 @@ def _imdb_id(obj: dict[str, Any]) -> Optional[str]:
 def _movie_action(score: Optional[int], threshold: int) -> tuple[str, str, bool]:
     """Return (action, reason, prevent_redownload).
 
-    Items with no rating, or a rating of 0, are never deleted — they're
+    Items with no rating, or a rating of 0, are never deleted - they're
     surfaced as needs-review only (a 0/missing score usually means the data is
     bad, not that the title is bad).
     """
     if score is None:
-        return ACTION_REVIEW, "No user rating available — skipped", False
+        return ACTION_REVIEW, "No user rating available - skipped", False
     if score <= 0:
-        return ACTION_REVIEW, "User rating is 0 / unavailable — skipped", False
+        return ACTION_REVIEW, "User rating is 0 / unavailable - skipped", False
     if score < threshold:
         return ACTION_DELETE, f"User rating {score}/100 is below threshold {threshold}", True
     return ACTION_KEEP, f"User rating {score}/100 meets threshold {threshold}", False
@@ -167,7 +167,7 @@ async def _scan_movies(scan_id: int, movies: list[dict[str, Any]], threshold: in
                 "title": m.get("title"), "year": m.get("year"), "score": score,
                 "rating_source": source, "path": path, "size_bytes": 0,
                 "proposed_action": ACTION_DELETE, "prevent_redl": add_excl,
-                "reason": f"Empty (0 bytes) and below threshold {threshold} — will be removed from Radarr",
+                "reason": f"Empty (0 bytes) and below threshold {threshold} - will be removed from Radarr",
                 "requested_by": requested_by, "selected": True,
             })
             empty_n += 1
@@ -183,9 +183,9 @@ async def _scan_movies(scan_id: int, movies: list[dict[str, Any]], threshold: in
         path_ok, path_reason = check_path(path, roots) if has_file else (False, "no file on disk")
         if action == ACTION_DELETE:
             if not has_file:
-                reason = "Below threshold but no file on disk — enable empty cleanup to remove"
+                reason = "Below threshold but no file on disk - enable empty cleanup to remove"
             elif not path_ok:
-                reason = f"Below threshold but path is unsafe ({path_reason}) — will NOT delete"
+                reason = f"Below threshold but path is unsafe ({path_reason}) - will NOT delete"
             else:
                 freed += size
                 flagged += 1
@@ -235,7 +235,7 @@ async def _scan_series(scan_id: int, series: list[dict[str, Any]], threshold: in
                 "tvdb_id": s.get("tvdbId"), "title": s.get("title"), "year": s.get("year"),
                 "score": score, "rating_source": source, "path": path, "size_bytes": 0,
                 "proposed_action": ACTION_DELETE, "prevent_redl": True,
-                "reason": f"Empty (0 bytes) and below threshold {threshold} — will be removed from Sonarr",
+                "reason": f"Empty (0 bytes) and below threshold {threshold} - will be removed from Sonarr",
                 "requested_by": requested_by, "selected": True,
             })
             empty_n += 1
@@ -252,14 +252,14 @@ async def _scan_series(scan_id: int, series: list[dict[str, Any]], threshold: in
         if action == ACTION_DELETE:
             note = "will be unmonitored" if unmonitor else "left monitored (toggle off)"
             if not has_file:
-                reason = f"Below threshold but no files on disk — enable empty cleanup to remove"
+                reason = f"Below threshold but no files on disk - enable empty cleanup to remove"
             elif not path_ok:
-                reason = (f"Below threshold but path is unsafe ({path_reason}) — "
+                reason = (f"Below threshold but path is unsafe ({path_reason}) - "
                           f"will NOT delete; {note}")
             else:
                 freed += size
                 flagged += 1
-                reason = (f"User rating {score}/100 is below threshold {threshold} — "
+                reason = (f"User rating {score}/100 is below threshold {threshold} - "
                           f"files will be deleted, {note}")
 
         database.add_scan_item(scan_id, {
@@ -336,7 +336,7 @@ async def run_dry_scan(scope: str) -> dict[str, Any]:
                     "media_type": "folder", "arr_id": None, "title": os.path.basename(d) or d,
                     "score": None, "rating_source": "empty folder", "path": d, "size_bytes": 0,
                     "proposed_action": ACTION_DELETE, "prevent_redl": False,
-                    "reason": "Orphaned empty folder (0 bytes) — will be removed from disk",
+                    "reason": "Orphaned empty folder (0 bytes) - will be removed from disk",
                     "selected": True,
                 })
                 empty_folders += 1
@@ -361,12 +361,12 @@ async def run_biggest_scan(scope: str, limit: int,
     """List the N largest items by size on disk (no ratings involved).
 
     scope: 'movies' | 'tv' | 'both'. Returns a scan whose items are sorted
-    largest first; nothing is pre-selected — the user picks what to purge.
+    largest first; nothing is pre-selected - the user picks what to purge.
     Updates the shared progress object so the UI can show a progress bar.
 
     When `empty_cleanup` is on, 0-byte entries (no files on disk) are surfaced
-    as removable candidates — removed from Radarr/Sonarr with the same
-    re-download restriction the rest of the app applies — and orphaned empty
+    as removable candidates - removed from Radarr/Sonarr with the same
+    re-download restriction the rest of the app applies - and orphaned empty
     folders under the media roots are listed for removal. These are pre-selected
     since there is nothing on disk to lose.
     """
@@ -388,7 +388,7 @@ async def run_biggest_scan(scope: str, limit: int,
         rec.update({
             "score": None, "rating_source": "empty", "size_bytes": 0,
             "proposed_action": ACTION_DELETE, "prevent_redl": add_excl,
-            "reason": f"Empty (0 bytes / no files) — will be removed from {app_name}{block}",
+            "reason": f"Empty (0 bytes / no files) - will be removed from {app_name}{block}",
             "requested_by": _requester(reqmap, rec["media_type"],
                                        rec.get("tmdb_id"), rec.get("tvdb_id")),
             "selected": True,
@@ -436,7 +436,7 @@ async def run_biggest_scan(scope: str, limit: int,
         seen_arr.add((rec["media_type"], rec.get("arr_id")))
         if empty_cleanup and not has_file:
             # No files on disk: remove the stale entry rather than show it as
-            # "not deletable". Pre-selected — there's nothing on disk to lose.
+            # "not deletable". Pre-selected - there's nothing on disk to lose.
             _mark_empty(rec)
             database.add_scan_item(scan_id, rec)
             _tick(rec.get("title") or "", size)
@@ -448,7 +448,7 @@ async def run_biggest_scan(scope: str, limit: int,
             "proposed_action": ACTION_DELETE if eligible else ACTION_REVIEW,
             "prevent_redl": eligible,
             "reason": (f"{_gb(size)} GB" if eligible
-                       else f"{_gb(size)} GB — not deletable ({path_reason})"),
+                       else f"{_gb(size)} GB - not deletable ({path_reason})"),
             "requested_by": _requester(reqmap, rec["media_type"], rec.get("tmdb_id"), rec.get("tvdb_id")),
             "selected": False,
         })
@@ -478,7 +478,7 @@ async def run_biggest_scan(scope: str, limit: int,
                     "title": os.path.basename(d) or d, "score": None,
                     "rating_source": "empty folder", "path": d, "size_bytes": 0,
                     "proposed_action": ACTION_DELETE, "prevent_redl": False,
-                    "reason": "Orphaned empty folder (0 bytes) — will be removed from disk",
+                    "reason": "Orphaned empty folder (0 bytes) - will be removed from disk",
                     "selected": True,
                 })
                 empty_folders += 1
