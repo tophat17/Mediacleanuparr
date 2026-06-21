@@ -76,10 +76,7 @@ async function loadSettings() {
   $("rtVal").textContent = s.min_rt_score;
   $("rtImdb").textContent = `(TMDb ${(s.min_rt_score / 10).toFixed(1)})`;
 
-  $("mediaRoots").textContent = (s._media_roots || []).join("  ·  ") || "(none configured)";
-  $("configDir").textContent = s._config_dir;
-  $("appPort").textContent = s._app_port;
-  $("tzVal").textContent = s._tz;
+  if ($("tzVal")) $("tzVal").textContent = s._tz;
   updateModeBadge(s.dry_run_only);
   updateTmdbGate(!!s.tmdb_api_key);
 }
@@ -423,8 +420,16 @@ function escapeHtml(s) {
 }
 
 // ------------------------------ init -------------------------------------
+async function loadVersion() {
+  try {
+    const h = await api("/api/health", { timeoutMs: 8000 });
+    if ($("appVersion") && h && h.version) $("appVersion").textContent = "v" + h.version;
+  } catch (_) { /* non-fatal */ }
+}
+
 loadSettings().catch((e) => console.error(e));
 loadExclusions().catch((e) => console.error(e));
+loadVersion();
 
 // --------------------------- biggest items -------------------------------
 let currentBiggestScanId = null;
@@ -448,6 +453,7 @@ if ($("runBiggest")) {
         body: JSON.stringify({
           scope: $("biggestScope").value,
           limit: parseInt($("biggestLimit").value, 10),
+          empty_cleanup: $("biggest_empty_cleanup") ? $("biggest_empty_cleanup").checked : false,
         }),
       });
       await pollBigProgress(st);
@@ -528,7 +534,12 @@ function renderBiggest(summary, items) {
   $("biggestResults").style.display = "block";
   $("biggestTotal").textContent = fmtBytes(summary.total_bytes);
   const scopeLabel = { both: "movies + shows", movies: "movies", tv: "shows" }[summary.scope] || "items";
-  $("biggestSub").textContent = `${summary.count} largest ${scopeLabel}`;
+  let sub = `${summary.count} largest ${scopeLabel}`;
+  if (summary.empty_cleanup) {
+    const e = summary.empty_items || 0, f = summary.empty_folders || 0;
+    if (e || f) sub += ` · ${e} empty entr${e === 1 ? "y" : "ies"} + ${f} orphaned folder${f === 1 ? "" : "s"} flagged`;
+  }
+  $("biggestSub").textContent = sub;
 
   const errBox = $("biggestErrors");
   errBox.innerHTML = (summary.errors && summary.errors.length)
@@ -544,7 +555,7 @@ function renderBiggest(summary, items) {
   body.innerHTML = items.map((it) => {
     const deletable = it.proposed_action === "delete";
     const cb = deletable
-      ? `<input type="checkbox" data-id="${it.id}" data-size="${it.size_bytes || 0}" />`
+      ? `<input type="checkbox" data-id="${it.id}" data-size="${it.size_bytes || 0}" ${it.selected ? "checked" : ""} />`
       : "";
     return `<tr>
       <td class="checkbox-cell">${cb}</td>

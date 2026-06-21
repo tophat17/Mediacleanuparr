@@ -356,14 +356,22 @@ def _gb(b: int) -> float:
     return round((b or 0) / 1_000_000_000, 1)
 
 
-async def run_biggest_scan(scope: str, limit: int) -> dict[str, Any]:
+async def run_biggest_scan(scope: str, limit: int,
+                           empty_cleanup: bool = False) -> dict[str, Any]:
     """List the N largest items by size on disk (no ratings involved).
 
     scope: 'movies' | 'tv' | 'both'. Returns a scan whose items are sorted
     largest first; nothing is pre-selected — the user picks what to purge.
     Updates the shared progress object so the UI can show a progress bar.
+
+    When `empty_cleanup` is on, 0-byte entries (no files on disk) are surfaced
+    as removable candidates — removed from Radarr/Sonarr with the same
+    re-download restriction the rest of the app applies — and orphaned empty
+    folders under the media roots are listed for removal. These are pre-selected
+    since there is nothing on disk to lose.
     """
     roots = config.media_roots()
+    add_excl = bool(config.get("add_import_exclusion"))
     do_movies = scope in ("movies", "both")
     do_tv = scope in ("tv", "both")
     scan_id = database.create_scan(f"biggest:{scope}", 0)
@@ -371,6 +379,20 @@ async def run_biggest_scan(scope: str, limit: int) -> dict[str, Any]:
     reqmap = await _seerr_request_map()
     errors: list[str] = []
     collected: list[tuple[int, dict[str, Any]]] = []
+
+    def _mark_empty(rec: dict[str, Any]) -> None:
+        """Turn a no-file arr entry into a removable empty candidate."""
+        app_name = "Radarr" if rec["media_type"] == "movie" else "Sonarr"
+        block = " & blocked from re-download" if add_excl else ""
+        rec.pop("has_file", None)
+        rec.update({
+            "score": None, "rating_source": "empty", "size_bytes": 0,
+            "proposed_action": ACTION_DELETE, "prevent_redl": add_excl,
+            "reason": f"Empty (0 bytes / no files) — will be removed from {app_name}{block}",
+            "requested_by": _requester(reqmap, rec["media_type"],
+                                       rec.get("tmdb_id"), rec.get("tvdb_id")),
+            "selected": True,
+        })
 
     if do_movies:
         try:
@@ -408,8 +430,17 @@ async def run_biggest_scan(scope: str, limit: int) -> dict[str, Any]:
     _set(phase="scanning", total_items=len(top),
          total_bytes=sum(sz for sz, _ in top))
     total = 0
+    seen_arr: set[tuple[Any, Any]] = set()
     for size, rec in top:
         has_file = rec.pop("has_file")
+        seen_arr.add((rec["media_type"], rec.get("arr_id")))
+        if empty_cleanup and not has_file:
+            # No files on disk: remove the stale entry rather than show it as
+            # "not deletable". Pre-selected — there's nothing on disk to lose.
+            _mark_empty(rec)
+            database.add_scan_item(scan_id, rec)
+            _tick(rec.get("title") or "", size)
+            continue
         path_ok, path_reason = check_path(rec["path"], roots) if has_file else (False, "no files on disk")
         eligible = has_file and path_ok
         rec.update({
@@ -425,9 +456,38 @@ async def run_biggest_scan(scope: str, limit: int) -> dict[str, Any]:
         total += size
         _tick(rec.get("title") or "", size)
 
+    # When cleaning up empties, surface EVERY 0-byte entry (not just those that
+    # happened to fall within the top-N) plus orphaned empty folders on disk.
+    empty_n = empty_folders = 0
+    if empty_cleanup:
+        for size, rec in collected:
+            if (rec["media_type"], rec.get("arr_id")) in seen_arr:
+                continue
+            if rec.get("has_file"):
+                continue
+            _mark_empty(rec)
+            database.add_scan_item(scan_id, rec)
+            empty_n += 1
+        for root in roots:
+            for d in find_empty_dirs(root):
+                ok, _reason = check_path(d, roots)
+                if not ok:
+                    continue
+                database.add_scan_item(scan_id, {
+                    "media_type": "folder", "arr_id": None,
+                    "title": os.path.basename(d) or d, "score": None,
+                    "rating_source": "empty folder", "path": d, "size_bytes": 0,
+                    "proposed_action": ACTION_DELETE, "prevent_redl": False,
+                    "reason": "Orphaned empty folder (0 bytes) — will be removed from disk",
+                    "selected": True,
+                })
+                empty_folders += 1
+
     summary = {
         "mode": "biggest", "scope": scope, "limit": int(limit),
         "count": len(top), "total_bytes": total, "scan_id": scan_id, "errors": errors,
+        "empty_cleanup": empty_cleanup, "empty_items": empty_n,
+        "empty_folders": empty_folders,
     }
     status = "completed" if not errors else "completed_with_errors"
     database.finish_scan(scan_id, status, summary)

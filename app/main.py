@@ -80,6 +80,7 @@ class ScanRequest(BaseModel):
 class BiggestRequest(BaseModel):
     scope: str = "movies"  # movies | both
     limit: int = 50
+    empty_cleanup: bool = False
 
 
 class SelectRequest(BaseModel):
@@ -197,9 +198,9 @@ def scan_progress() -> dict[str, Any]:
     return scanner.get_progress()
 
 
-async def _run_biggest_bg(scope: str, limit: int) -> None:
+async def _run_biggest_bg(scope: str, limit: int, empty_cleanup: bool) -> None:
     try:
-        await scanner.run_biggest_scan(scope, limit)
+        await scanner.run_biggest_scan(scope, limit, empty_cleanup)
     except Exception as exc:  # noqa: BLE001
         log.exception("biggest scan failed")
         scanner.mark_error(str(exc))
@@ -212,10 +213,12 @@ async def biggest(body: BiggestRequest) -> dict[str, Any]:
     if scanner.is_running():
         raise HTTPException(409, "A scan is already running.")
     limit = max(1, min(500, int(body.limit)))
-    log.info("starting biggest-items scan scope=%s limit=%s", body.scope, limit)
+    log.info("starting biggest-items scan scope=%s limit=%s empty=%s",
+             body.scope, limit, body.empty_cleanup)
     scanner.reset_progress(f"biggest:{body.scope}")
     global _scan_task
-    _scan_task = asyncio.create_task(_run_biggest_bg(body.scope, limit))
+    _scan_task = asyncio.create_task(
+        _run_biggest_bg(body.scope, limit, body.empty_cleanup))
     return {"status": "started", "scope": body.scope}
 
 

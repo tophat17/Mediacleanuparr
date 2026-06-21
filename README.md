@@ -57,6 +57,10 @@ outside your media folder.
   needed. TMDb has no daily request cap, so it scales to large libraries.
 - **Biggest items tab.** Find the N titles using the most disk space (movies, TV,
   or both) regardless of rating — great for clearing large shows you never watch.
+  Scans up to **500 items**, and an optional **Remove empty items & orphaned
+  folders** toggle surfaces every 0-byte entry (removed from Radarr/Sonarr with
+  the same re-download restriction the rest of the app applies) plus orphaned
+  empty folders on disk — all pre-selected for one-click cleanup.
 - **Empty / 0-byte cleanup.** A toggle that auto-selects entries with **no files
   on disk that are also below your rating threshold** and removes them from
   Radarr/Sonarr (no file-deletion needed — there's nothing to delete). It also
@@ -174,9 +178,11 @@ Open `http://<server-ip>:8787` and go to the **Setup** tab:
 scan. Review the flagged list, adjust the checkboxes, type `DELETE`, and confirm
 to act. Each row has an **Exclude** box to skip that title forever.
 
-**Biggest items tab.** Pick Movies / TV / Both and how many to show, then **Find
-biggest items**. It lists the largest titles by size; tick the ones to purge and
-confirm.
+**Biggest items tab.** Pick Movies / TV / Both and how many to show (up to 500),
+then **Find biggest items**. It lists the largest titles by size; tick the ones
+to purge and confirm. Enable **Remove empty items & orphaned folders** to also
+flag every 0-byte entry (removed from Radarr/Sonarr and blocked from
+re-download) and orphaned empty folders on disk — these come pre-selected.
 
 **Logs & reports tab.** A full audit trail of every action, plus downloadable
 JSON/CSV reports of each deletion run.

@@ -313,3 +313,14 @@ td.score { font-family: var(--mono); }
 .excl-row:last-child { border-bottom: 0; }
 .excl-title { flex: 1; font-size: 13px; }
 .excl-row .btn { padding: 3px 10px; font-size: 12px; }
+
+/* app version footer */
+.app-footer {
+  border-top: 1px solid var(--border);
+  padding: 14px 24px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 11px;
+}
+.app-footer .dot { color: var(--accent); }
+.app-footer .mono { font-family: var(--mono); }

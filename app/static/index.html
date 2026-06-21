@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>mediacleanuparr</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="stylesheet" href="/style.css?v=18" />
+  <link rel="stylesheet" href="/style.css?v=19" />
 </head>
 <body>
   <header>
@@ -127,12 +127,8 @@
 
       <div class="panel">
         <h2>Environment (read-only)</h2>
-        <p class="muted" style="font-size:12px;margin:0 0 6px">
-          Media roots: <span id="mediaRoots" class="status"></span>
-        </p>
         <p class="muted" style="font-size:12px;margin:0">
-          Config dir: <span id="configDir" class="status"></span> · Port:
-          <span id="appPort" class="status"></span> · TZ: <span id="tzVal" class="status"></span>
+          TZ: <span id="tzVal" class="status"></span>
         </p>
       </div>
 
@@ -274,9 +270,14 @@
         <div class="field">
           <label>How many to show (largest first)</label>
           <div class="slider-wrap">
-            <input id="biggestLimit" type="range" min="5" max="200" value="50" step="5" />
+            <input id="biggestLimit" type="range" min="5" max="500" value="50" step="5" />
             <span class="slider-val"><span id="biggestLimitVal">50</span> items</span>
           </div>
+        </div>
+        <div class="toggle">
+          <input type="checkbox" id="biggest_empty_cleanup" />
+          <label>Remove empty items &amp; orphaned folders
+            <span class="hint">— flags 0-byte entries with no files (removed from Radarr/Sonarr &amp; blocked from re-download) and orphaned empty folders on disk; these are pre-selected</span></label>
         </div>
         <div class="btn-row">
           <button class="btn" id="runBiggest">Find biggest items</button>
@@ -357,6 +358,10 @@
     </section>
   </main>
 
-  <script src="/app.js?v=18"></script>
+  <footer class="app-footer">
+    <span>media<span class="dot">·</span>cleanuparr <span id="appVersion" class="mono"></span></span>
+  </footer>
+
+  <script src="/app.js?v=19"></script>
 </body>
 </html>
