@@ -180,3 +180,23 @@ def test_webhook_parses_and_calls_unblock(monkeypatch):
         assert r.status_code == 200, r.text
         assert r.json()["ok"] is True
     assert captured == {"media_type": "movie", "tmdb_id": 555, "tvdb_id": None}
+
+
+def test_fallback_clears_unrecorded_exclusion(monkeypatch):
+    """No recorded block, but a matching Radarr exclusion exists -> cleared."""
+    _fresh_db()
+    fake = FakeRadarr(movie_present=False)  # has exclusion tmdbId 100
+    monkeypatch.setattr(unblock, "_radarr", lambda: fake)
+    res = asyncio.run(unblock.unblock_title("movie", 100, None))
+    assert res["unblocked"] is True
+    assert ("remove_excl", 100) in fake.calls
+    assert any(c[0] == "add" for c in fake.calls)
+
+
+def test_fallback_noop_when_no_matching_exclusion(monkeypatch):
+    _fresh_db()
+    fake = FakeRadarr(movie_present=False)  # exclusion is for 100, not 999
+    monkeypatch.setattr(unblock, "_radarr", lambda: fake)
+    res = asyncio.run(unblock.unblock_title("movie", 999, None))
+    assert res["unblocked"] is False
+    assert not any(c[0] == "add" for c in fake.calls)

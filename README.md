@@ -76,10 +76,10 @@ outside your media folder.
   **re-requestable** — it is **not** blacklisted.
 - **Auto-unblock on re-request (optional).** Turn on *"Auto-unblock when
   re-requested in Seerr"* and point an Overseerr/Jellyseerr webhook at the app. When
-  a human re-requests a previously-removed title, mediacleanuparr automatically lifts
-  the block it set — removes the Radarr/Sonarr exclusion, re-monitors, and re-adds &
-  searches if needed. It only ever lifts blocks **it** applied, never ones you set
-  yourself.
+  a human re-requests a title, mediacleanuparr removes the matching Radarr/Sonarr
+  exclusion — whether it set the exclusion or it predates the app — then re-monitors
+  and re-adds & searches. This also clears your existing backlog of exclusions as
+  titles get re-requested.
 - **Sonarr handling.** Sonarr has no native import exclusion like Radarr, so a
   single **Unmonitor flagged series** toggle keeps the show in Sonarr but stops
   it re-downloading.

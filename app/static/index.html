@@ -515,11 +515,12 @@
             request is fulfilled even if the exclusion briefly blocked Seerr's own add.</li>
         </ul>
         <p class="muted" style="font-size:12px">
-          It only ever lifts blocks <em>this app</em> recorded — a title you unmonitored or
-          excluded yourself is never touched. To set up: enable the toggle in Setup, click
-          Save, then paste the generated <strong>Webhook URL</strong> into
-          Overseerr/Jellyseerr → Settings → Notifications → Webhook (trigger on request
-          events). The token in the URL keeps it private.
+          On a re-request it clears the matching Radarr/Sonarr exclusion — whether this app
+          set it or it predates the app — then re-monitors and re-adds &amp; searches. (So an
+          exclusion you added by hand is also cleared if that title is re-requested.) To set
+          up: enable the toggle in Setup, click Save, then paste the generated
+          <strong>Webhook URL</strong> into Overseerr/Jellyseerr → Settings → Notifications →
+          Webhook (trigger on request events). The token in the URL keeps it private.
         </p>
       </div>
     </section>
